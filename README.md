@@ -180,15 +180,38 @@ correct: >-
 </details>
 
 
+## Features
+
+#### `shuffle: true`
+
+Quiz options can be **shuffled** on each attempt to **reduce pattern recognition**
+and avoid learning answer positions.
+Default is false.
+
+#### `gated: true`
+
+Quiz content can be **gated**—encouraging **closed-book testing** and **active recall**.
+Note's text becomes hidden until you complete the quiz or stop interacting with the quiz.
+Default is false.
+
+#### `instant: true`
+
+Instant feedback after choosing an option. `[Check]` button is hidden.
+
+
 ## Notes & limitations
 
-- In source mode, quizzes are shown as YAML code blocks.
-- Editor syntax highlighting doesn't work (help me!).
-- Quiz blocks are rendered in preview/reading mode.
-- Errors related to missing fields can be awkward.
-- Chosen answers are kept until the page is closed.
-- More quiz types planned: cards.
-- This is an early-stage plugin — feel free to open an issue and share feedback.
+This is an early-stage plugin, bugs are possible. Feel free to [open an issue](https://github.com/xamgore/obsidian-quiz-blocks/issues/new/choose) and share feedback.
+
+To access an interactive quiz in the preview mode, you have to write some YAML code
+in the source mode. Unfortunately, there is no syntax highlighting to assist you
+(vote [#3](https://github.com/xamgore/obsidian-quiz-blocks/issues/3)). 
+Additionally, errors related to missing fields can be quite cumbersome 
+(vote [#4](https://github.com/xamgore/obsidian-quiz-blocks/issues/4)).
+
+- Answers are ephemeral, kept until the tab is closed. If you have a good reason to keep them longer, vote [#2](https://github.com/xamgore/obsidian-quiz-blocks/issues/2).
+- `shuffle` and `instant` are not implemented yet.
+- More quiz types planned: `cards`.
 
 
 ## Motivation

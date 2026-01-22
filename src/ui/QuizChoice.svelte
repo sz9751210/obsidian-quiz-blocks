@@ -6,9 +6,10 @@
 	interface Props {
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "choice" }>;
+		finish: () => void;
 	}
 
-	let { ctx, quiz }: Props = $props();
+	let { ctx, quiz, finish }: Props = $props();
 	let answers = $state<Record<number, string>>({});
 	let frozen = $state(false);
 
@@ -24,6 +25,7 @@
 
 	function onCheck() {
 		frozen = true;
+		finish();
 	}
 
 	function onReset() {

@@ -8,9 +8,10 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "radio" }>;
 		stableId: string;
+		finish: () => void;
 	}
 
-	let { ctx, stableId, quiz }: Props = $props();
+	let { ctx, stableId, quiz, finish }: Props = $props();
 	let selectedId = $state<string | null>(null);
 	let frozen = $state(false);
 
@@ -26,6 +27,7 @@
 	function onCheck() {
 		if (!selectedId) return;
 		frozen = true;
+		finish();
 	}
 
 	function onReset() {

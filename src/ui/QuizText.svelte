@@ -9,9 +9,10 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "text" }>;
 		stableId: string;
+		finish: () => void;
 	}
 
-	let { ctx, stableId, quiz }: Props = $props();
+	let { ctx, stableId, quiz, finish }: Props = $props();
 	let answer = $state("");
 	let frozen = $state(false);
 	let textarea: Element;
@@ -21,6 +22,7 @@
 		// and reveals the reference answer (if provided).
 		if (answer.trim().length === 0) return;
 		frozen = true;
+		finish();
 	}
 
 	async function onReset() {

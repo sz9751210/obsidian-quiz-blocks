@@ -9,9 +9,10 @@
 	interface Props {
 		ctx: AppContext;
 		quiz: Extract<Quiz, { type: "noodle" }>;
+		finish: () => void;
 	}
 
-	let { ctx, quiz }: Props = $props();
+	let { ctx, quiz, finish }: Props = $props();
 
 	let pairs = $state<Pair[]>([]);
 	let frozen = $state(false);
@@ -381,6 +382,7 @@
 		pending = null;
 		dragging = false;
 		hoverTarget = null;
+		finish();
 	}
 
 	function onReset() {

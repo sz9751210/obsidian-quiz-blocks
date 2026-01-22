@@ -39,37 +39,37 @@ export const QuizChoiceQuestionSchema = z.preprocess((input) => {
 	feedback: z.string().default("").transform(s => s.trim()),
 }));
 
+// Common fields shared by all quizzes.
+export const BaseQuizSchema = z.object({
+	id: optionalIdSchema,
+	content: z.string().default(""),
+	// `gated: true` hides quiz content until started, and (when active) hides the rest of the note.
+	gated: nullToUndefined(z.boolean()).default(false),
+});
+
 /* quiz types */
 
-const QuizRadioSchema = z.object({
-	id: optionalIdSchema,
+const QuizRadioSchema = BaseQuizSchema.extend({
 	type: z.literal("radio"),
-	content: z.string().default(""),
 	options: z.array(QuizOptionSchema),
 });
 
-const QuizCheckboxSchema = z.object({
-	id: optionalIdSchema,
+const QuizCheckboxSchema = BaseQuizSchema.extend({
 	type: z.literal("checkbox"),
-	content: z.string().default(""),
 	options: z.array(QuizOptionSchema),
 });
 
-const QuizTextSchema = z.object({
-	id: optionalIdSchema,
+const QuizTextSchema = BaseQuizSchema.extend({
 	type: z.literal("text"),
-	content: z.string().default(""),
 	// Free-text quizzes can't be auto-graded (yet). This is the reference answer.
 	correct: z.string().optional().transform((s) => (s ?? "").trim()),
 	// Optional extra feedback/explanation shown after checking.
 	feedback: z.string().optional().transform((s) => (s ?? "").trim()),
 });
 
-const QuizChoiceSchema = z
-	.object({
-		id: optionalIdSchema,
+const QuizChoiceSchema = BaseQuizSchema
+	.extend({
 		type: z.literal("choice"),
-		content: z.string().default(""),
 		options: z.array(QuizOptionSchema).default([]),
 		questions: z.array(QuizChoiceQuestionSchema).default([]),
 	})
@@ -107,11 +107,9 @@ const QuizChoiceSchema = z
 		});
 	});
 
-const QuizNoodleSchema = z
-	.object({
-		id: optionalIdSchema,
+const QuizNoodleSchema = BaseQuizSchema
+	.extend({
 		type: z.literal("noodle"),
-		content: z.string().default(""),
 		options: z.array(QuizOptionSchema).default([]),
 		questions: z.array(QuizChoiceQuestionSchema).default([]),
 	})

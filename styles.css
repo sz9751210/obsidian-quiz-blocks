@@ -447,3 +447,21 @@
 	font: inherit;
 	color: inherit;
 }
+
+/* gated quizzes */
+
+/* Hide everything in the preview while a gated quiz is active (class is toggled on .view-content). */
+.view-content.quiz-block-gated .markdown-preview-view * {
+	visibility: hidden;
+}
+
+/* Reveal the active quiz again (visibility can override inherited hidden). */
+.view-content.quiz-block-gated .markdown-preview-view .quiz-block.quiz-block--active,
+.view-content.quiz-block-gated .markdown-preview-view .quiz-block.quiz-block--active * {
+	visibility: visible;
+}
+
+/* Make other quizzes non-interactive while gating is on. */
+.view-content.quiz-block-gated .markdown-preview-view .quiz-block:not(.quiz-block--active) {
+	pointer-events: none;
+}

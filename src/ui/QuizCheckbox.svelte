@@ -8,9 +8,10 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "checkbox" }>;
 		stableId: string;
+		finish: () => void;
 	}
 
-	let { ctx, stableId, quiz }: Props = $props();
+	let { ctx, stableId, quiz, finish }: Props = $props();
 	let selectedIds = $state<Set<string>>(new Set());
 	let frozen = $state(false);
 
@@ -32,6 +33,7 @@
 	function onCheck() {
 		if (selectedIds.size === 0) return;
 		frozen = true;
+		finish();
 	}
 
 	function onReset() {
