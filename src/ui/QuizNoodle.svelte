@@ -272,14 +272,12 @@
 		const ro = new ResizeObserver(() => updateCenters());
 		ro.observe(containerEl);
 
-		window.addEventListener("resize", updateCenters);
-		window.addEventListener("scroll", updateCenters, { passive: true, capture: true });
+		ctx.component.registerDomEvent(window, "resize", updateCenters);
+		ctx.component.registerDomEvent(window, "scroll", updateCenters, { passive: true, capture: true });
 
 		return () => {
 			ro.disconnect();
 			mo.disconnect();
-			window.removeEventListener("resize", updateCenters);
-			window.removeEventListener("scroll", updateCenters, { capture: true } as any);
 		};
 	});
 

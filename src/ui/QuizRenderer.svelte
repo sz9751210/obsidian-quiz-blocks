@@ -183,29 +183,23 @@
 			requestAnimationFrame(recomputeHoverFromPointer);
 		};
 
-		document.addEventListener("pointermove", onPointerMove, true);
-		document.addEventListener("pointerdown", onPointerDownOrTouchStart, true);
-		document.addEventListener("touchstart", onPointerDownOrTouchStart, true);
-		document.addEventListener("keydown", onKeyDown, true);
+		ctx.component.registerDomEvent(document, "pointermove", onPointerMove, true);
+		ctx.component.registerDomEvent(document, "pointerdown", onPointerDownOrTouchStart, true);
+		ctx.component.registerDomEvent(document, "touchstart", onPointerDownOrTouchStart, true);
+		ctx.component.registerDomEvent(document, "keydown", onKeyDown, true);
 
-		document.addEventListener("wheel", onWheelOrScroll, { capture: true, passive: true });
-		(previewEl ?? document).addEventListener("scroll", onWheelOrScroll, {
+		ctx.component.registerDomEvent(document, "wheel", onWheelOrScroll, { capture: true, passive: true });
+		ctx.component.registerDomEvent(previewEl ?? document, "scroll", onWheelOrScroll, {
 			capture: true,
 			passive: true,
 		});
-		document.addEventListener("touchmove", onTouchMove, { capture: true, passive: true });
+		ctx.component.registerDomEvent(document, "touchmove", onTouchMove, {
+			capture: true,
+			passive: true,
+		});
 
 		return () => {
 			clearRedaction();
-
-			document.removeEventListener("pointermove", onPointerMove, true);
-			document.removeEventListener("pointerdown", onPointerDownOrTouchStart, true);
-			document.removeEventListener("touchstart", onPointerDownOrTouchStart, true);
-			document.removeEventListener("keydown", onKeyDown, true);
-
-			document.removeEventListener("wheel", onWheelOrScroll as any, true);
-			(previewEl ?? document).removeEventListener("scroll", onWheelOrScroll as any, true);
-			document.removeEventListener("touchmove", onTouchMove as any, true);
 		};
 	});
 </script>
