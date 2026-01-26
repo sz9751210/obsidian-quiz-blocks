@@ -5,6 +5,7 @@ import { mount, unmount } from "svelte";
 import { type AppContext } from "./markdown";
 import QuizRenderer from "./ui/QuizRenderer.svelte";
 import { hash } from "./hash";
+import { shuffleOptions } from "./shuffle";
 
 type RenderArgs = {
 	app: App;
@@ -58,6 +59,8 @@ export function renderQuiz({ app, component, source, el, ctx }: RenderArgs) {
 
 	const section = ctx.getSectionInfo(el);
 	const stableId = [quiz.id, ctx.sourcePath, section?.lineStart, section?.lineEnd, quiz.type].join();
+
+	if (quiz.shuffle /* || global.shuffleByDefault */) shuffleOptions(quiz, el);
 
 	const props: Props = {
 		ctx: { app, component, sourcePath: ctx.sourcePath },

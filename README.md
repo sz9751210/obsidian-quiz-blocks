@@ -184,8 +184,7 @@ correct: >-
 
 #### `shuffle: true`
 
-Quiz options can be **shuffled** on each attempt to **reduce pattern recognition**
-and avoid learning answer positions.
+Quiz options can be **shuffled** to reduce **pattern recognition** and avoid learning answer positions.
 Default is false.
 
 #### `gated: true`

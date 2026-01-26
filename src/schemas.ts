@@ -45,6 +45,8 @@ export const BaseQuizSchema = z.object({
 	content: z.string().default(""),
 	// `gated: true` hides quiz content until started, and (when active) hides the rest of the note.
 	gated: nullToUndefined(z.boolean()).default(false),
+	// `shuffle: true` mixes options on first render and keeps the seed in the element to ensure stability.
+	shuffle: z.boolean().optional().default(false),
 });
 
 /* quiz types */
