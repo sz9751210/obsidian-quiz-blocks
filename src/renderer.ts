@@ -50,7 +50,8 @@ export function renderQuiz({ app, component, source, el, ctx }: RenderArgs) {
 
 	let quiz: Quiz;
 	try {
-		quiz = parseQuizBlock(source);
+		const tabSize = Number(app.vault.getConfig("tabSize") ?? 4);
+		quiz = parseQuizBlock(source, tabSize);
 	} catch (e) {
 		const pre = el.createEl("pre", { cls: "quiz-block-error" });
 		pre.textContent = String(e);

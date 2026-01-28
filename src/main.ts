@@ -58,3 +58,9 @@ export default class QuizBlocksPlugin extends Plugin {
 		});
 	}
 }
+
+declare module "obsidian" {
+	interface Vault {
+		getConfig(key: string): unknown;
+	}
+}
