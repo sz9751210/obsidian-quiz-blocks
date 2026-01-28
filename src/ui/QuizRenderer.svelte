@@ -189,10 +189,9 @@
 		ctx.component.registerDomEvent(document, "keydown", onKeyDown, true);
 
 		ctx.component.registerDomEvent(document, "wheel", onWheelOrScroll, { capture: true, passive: true });
-		ctx.component.registerDomEvent(previewEl ?? document, "scroll", onWheelOrScroll, {
-			capture: true,
-			passive: true,
-		});
+		previewEl
+			? ctx.component.registerDomEvent(previewEl, "scroll", onWheelOrScroll, { capture: true, passive: true })
+			: ctx.component.registerDomEvent(document, "scroll", onWheelOrScroll, { capture: true, passive: true });
 		ctx.component.registerDomEvent(document, "touchmove", onTouchMove, {
 			capture: true,
 			passive: true,
