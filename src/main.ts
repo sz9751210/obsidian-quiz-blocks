@@ -1,9 +1,12 @@
 import { Plugin } from "obsidian";
 import { checkboxSnippet, choiceSnippet, noodleSnippet, radioSnippet, textSnippet } from "./snippets";
 import { renderQuiz } from "./renderer";
+import { yamlSyntaxHighlighter } from "./syntax-highlighter/extension";
 
 export default class QuizBlocksPlugin extends Plugin {
 	onload() {
+		this.registerEditorExtension(yamlSyntaxHighlighter);
+
 		this.registerMarkdownCodeBlockProcessor("quiz", (source, el, ctx) => {
 			renderQuiz({
 				app: this.app,
