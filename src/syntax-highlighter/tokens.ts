@@ -1,4 +1,5 @@
-import { ContextTracker, ExternalTokenizer } from "@lezer/lr"
+import { ContextTracker, ExternalTokenizer, InputStream } from "@lezer/lr"
+import type { Stack as LrStack } from "@lezer/lr"
 import {
 	Alias,
 	Anchor,
@@ -28,66 +29,77 @@ import {
 	Tag
 } from "./parser.terms.js"
 
-const
-	type_Top = 0, // Top document level
-	type_Seq = 1, // Block sequence
-	type_Map = 2, // Block mapping
-	type_Flow = 3, // Inside flow content
-	type_Lit = 4 // Block literal with explicit indentation
+type char = number;
 
-class Context {
-	constructor(parent, depth, type) {
-		this.parent = parent
-		this.depth = depth
-		this.type = type
-		this.hash = (parent ? parent.hash + parent.hash << 8 : 0) + depth + (depth << 4) + type
-	}
+enum Type {
+	// Top document level
+	Top = 0,
+	// Block sequence
+	Seq = 1,
+	// Block mapping
+	Map = 2,
+	// Inside flow content
+	Flow = 3,
+	// Block literal with explicit indentation
+	Lit = 4,
 }
 
-Context.top = new Context(null, -1, type_Top)
+class Context {
+	hash: number;
 
-function findColumn(input, pos) {
+	constructor(public parent: Context, public depth: number, public type: Type) {
+		this.hash = (parent ? parent.hash + parent.hash << 8 : 0) + depth + (depth << 4) + type
+	}
+
+	static top: Context = new Context(null!, -1, Type.Top);
+}
+
+type Stack<C> = Omit<LrStack, 'context'> & {
+	readonly context: C;
+}
+
+function findColumn(input: InputStream, pos: number): number {
 	for (let col = 0, p = pos - input.pos - 1; ; p--, col++) {
 		let ch = input.peek(p)
 		if (isBreakSpace(ch) || ch === -1) return col
 	}
 }
 
-function isNonBreakSpace(ch) {
+function isNonBreakSpace(ch: char): boolean {
 	return ch === 32 || ch === 9
 }
 
-function isBreakSpace(ch) {
+function isBreakSpace(ch: char): boolean {
 	return ch === 10 || ch === 13
 }
 
-function isSpace(ch) {
+function isSpace(ch: char): boolean {
 	return isNonBreakSpace(ch) || isBreakSpace(ch)
 }
 
-function isSep(ch) {
+function isSep(ch: char): boolean {
 	return ch < 0 || isSpace(ch)
 }
 
-export const indentation = new ContextTracker({
+export const indentation = new ContextTracker<Context>({
 	start: Context.top,
 	reduce(context, term) {
-		return context.type === type_Flow && (term === FlowSequence || term === FlowMapping) ? context.parent : context
+		return context.type === Type.Flow && (term === FlowSequence || term === FlowMapping) ? context.parent : context
 	},
-	shift(context, term, stack, input) {
+	shift(context, term, stack: Stack<Context>, input: InputStream) {
 		if (term === sequenceStartMark)
-			return new Context(context, findColumn(input, input.pos), type_Seq)
+			return new Context(context, findColumn(input, input.pos), Type.Seq)
 		if (term === mapStartMark || term === explicitMapStartMark)
-			return new Context(context, findColumn(input, input.pos), type_Map)
+			return new Context(context, findColumn(input, input.pos), Type.Map)
 		if (term === blockEnd)
 			return context.parent
 		if (term === BracketL || term === BraceL)
-			return new Context(context, 0, type_Flow)
-		if (term === BlockLiteralContent && context.type === type_Lit)
+			return new Context(context, 0, Type.Flow)
+		if (term === BlockLiteralContent && context.type === Type.Lit)
 			return context.parent
 		if (term === BlockLiteralHeader) {
 			let indent = /[1-9]/.exec(input.read(input.pos, stack.pos))
-			if (indent) return new Context(context, context.depth + (+indent[0]), type_Lit)
+			if (indent) return new Context(context, context.depth + (+indent[0]), Type.Lit)
 		}
 		return context
 	},
@@ -96,15 +108,15 @@ export const indentation = new ContextTracker({
 	}
 })
 
-function three(input, ch, off = 0) {
+function three(input: InputStream, ch: char, off = 0): boolean {
 	return input.peek(off) === ch && input.peek(off + 1) === ch && input.peek(off + 2) === ch && isSep(input.peek(off + 3))
 }
 
-export const newlines = new ExternalTokenizer((input, stack) => {
+export const newlines = new ExternalTokenizer((input: InputStream, stack: Stack<Context>) => {
 	if (input.next === -1 && stack.canShift(eof))
 		return input.acceptToken(eof)
 	let prev = input.peek(-1)
-	if ((isBreakSpace(prev) || prev < 0) && stack.context.type !== type_Flow) {
+	if ((isBreakSpace(prev) || prev < 0) && stack.context.type !== Type.Flow) {
 		if (three(input, 45 /* '-' */)) {
 			if (stack.canShift(blockEnd)) input.acceptToken(blockEnd)
 			else return input.acceptToken(DirectiveEnd, 3)
@@ -119,7 +131,7 @@ export const newlines = new ExternalTokenizer((input, stack) => {
 			input.advance()
 		}
 		if ((depth < stack.context.depth ||
-				depth === stack.context.depth && stack.context.type === type_Seq &&
+				depth === stack.context.depth && stack.context.type === Type.Seq &&
 				(input.next !== 45 /* '-' */ || !isSep(input.peek(1)))) &&
 			// Not blank
 			input.next !== -1 && !isBreakSpace(input.next) && input.next !== 35 /* '#' */)
@@ -127,8 +139,8 @@ export const newlines = new ExternalTokenizer((input, stack) => {
 	}
 }, { contextual: true })
 
-export const blockMark = new ExternalTokenizer((input, stack) => {
-	if (stack.context.type === type_Flow) {
+export const blockMark = new ExternalTokenizer((input: InputStream, stack: Stack<Context>) => {
+	if (stack.context.type === Type.Flow) {
 		if (input.next === 63 /* '?' */) {
 			input.advance()
 			if (isSep(input.next)) input.acceptToken(flowMapMark)
@@ -138,12 +150,12 @@ export const blockMark = new ExternalTokenizer((input, stack) => {
 	if (input.next === 45 /* '-' */) {
 		input.advance()
 		if (isSep(input.next))
-			input.acceptToken(stack.context.type === type_Seq && stack.context.depth === findColumn(input, input.pos - 1)
+			input.acceptToken(stack.context.type === Type.Seq && stack.context.depth === findColumn(input, input.pos - 1)
 				? sequenceContinueMark : sequenceStartMark)
 	} else if (input.next === 63 /* '?' */) {
 		input.advance()
 		if (isSep(input.next))
-			input.acceptToken(stack.context.type === type_Map && stack.context.depth === findColumn(input, input.pos - 1)
+			input.acceptToken(stack.context.type === Type.Map && stack.context.depth === findColumn(input, input.pos - 1)
 				? explicitMapContinueMark : explicitMapStartMark)
 	} else {
 		let start = input.pos
@@ -175,22 +187,22 @@ export const blockMark = new ExternalTokenizer((input, stack) => {
 			if (input.pos === start && stack.canShift(Colon)) return
 			let after = input.peek(1)
 			if (isSep(after))
-				input.acceptTokenTo(stack.context.type === type_Map && stack.context.depth === findColumn(input, start)
+				input.acceptTokenTo(stack.context.type === Type.Map && stack.context.depth === findColumn(input, start)
 					? mapContinueMark : mapStartMark, start)
 		}
 	}
 }, { contextual: true })
 
-function uriChar(ch) {
+function uriChar(ch: char): boolean {
 	return ch > 32 && ch < 127 && ch !== 34 && ch !== 37 && ch !== 44 && ch !== 60 &&
 		ch !== 62 && ch !== 92 && ch !== 94 && ch !== 96 && ch !== 123 && ch !== 124 && ch !== 125
 }
 
-function hexChar(ch) {
+function hexChar(ch: char): boolean {
 	return ch >= 48 && ch <= 57 || ch >= 97 && ch <= 102 || ch >= 65 && ch <= 70
 }
 
-function readUriChar(input, quoted) {
+function readUriChar(input: InputStream, quoted: boolean): boolean {
 	if (input.next === 37 /* '%' */) {
 		input.advance()
 		if (hexChar(input.next)) input.advance()
@@ -203,13 +215,13 @@ function readUriChar(input, quoted) {
 	return false
 }
 
-function readTag(input) {
+function readTag(input: InputStream) {
 	input.advance() // !
 	if (input.next === 60 /* '<' */) {
 		input.advance()
 		for (; ;) {
 			if (!readUriChar(input, true)) {
-				if (input.next === 62 /* '>' */) input.advance()
+				if ((input.next as number) === 62 /* '>' */) input.advance()
 				break
 			}
 		}
@@ -220,12 +232,12 @@ function readTag(input) {
 	}
 }
 
-function readAnchor(input) {
+function readAnchor(input: InputStream) {
 	input.advance()
-	while (!isSep(input.next) && charTag(input.tag) !== "f") input.advance()
+	while (!isSep(input.next) && charTag(input.next) !== "f") input.advance()
 }
 
-function readQuoted(input, scan) {
+function readQuoted(input: InputStream, scan: boolean): boolean {
 	let quote = input.next, lineBreak = false, start = input.pos
 	input.advance()
 	for (; ;) {
@@ -251,7 +263,7 @@ function readQuoted(input, scan) {
 	return !lineBreak
 }
 
-function scanBrackets(input) {
+function scanBrackets(input: InputStream): boolean {
 	for (let stack = [], end = input.pos + 1024; ;) {
 		if (input.next === 91 /* '[' */ || input.next === 123 /* '{' */) {
 			stack.push(input.next)
@@ -274,18 +286,18 @@ function scanBrackets(input) {
 // "Safe char" info for char codes 33 to 125. s: safe, i: indicator, f: flow indicator
 const charTable = "iiisiiissisfissssssssssssisssiiissssssssssssssssssssssssssfsfssissssssssssssssssssssssssssfif"
 
-function charTag(ch) {
+function charTag(ch: char) {
 	if (ch < 33) return "u"
 	if (ch > 125) return "s"
 	return charTable[ch - 33]
 }
 
-function isSafe(ch, inFlow) {
+function isSafe(ch: char, inFlow: boolean): boolean {
 	let tag = charTag(ch)
 	return tag !== "u" && !(inFlow && tag === "f")
 }
 
-function readPlain(input, scan, inFlow, indent) {
+function readPlain(input: InputStream, scan: boolean, inFlow: boolean, indent: number): boolean {
 	if (charTag(input.next) === "s" ||
 		(input.next === 63 /* '?' */ || input.next === 58 /* ':' */ || input.next === 45 /* '-' */) &&
 		isSafe(input.peek(1), inFlow)) {
@@ -319,14 +331,14 @@ function readPlain(input, scan, inFlow, indent) {
 	return true
 }
 
-function digitValue(ch) {
+function digitValue(ch: char): number {
 	if (ch >= 48 && ch <= 57) return ch - 48
 	if (ch >= 65 && ch <= 70) return ch - 65 + 10
 	if (ch >= 97 && ch <= 102) return ch - 97 + 10
 	return -1
 }
 
-function scanDigits(s, i, base) {
+function scanDigits(s: string, i: number, base: number) {
 	let had = false
 	while (i < s.length) {
 		let ch = s.charCodeAt(i)
@@ -345,7 +357,7 @@ function scanDigits(s, i, base) {
 	return { i, had }
 }
 
-function scanExponent(s, i) {
+function scanExponent(s: string, i: number) {
 	// FIX: reaching end-of-string is fine when there's no exponent.
 	if (i >= s.length) return { i, ok: true }
 
@@ -362,7 +374,7 @@ function scanExponent(s, i) {
 	return { i: r.i, ok: true }
 }
 
-function isNumberLike(text) {
+function isNumberLike(text: string): boolean {
 	// Supports (roughly): signed decimal int/float, .float, exponent, 0b/0o/0x with underscores
 	let s = text
 	let i = 0
@@ -425,7 +437,7 @@ function isNumberLike(text) {
 	return i === s.length
 }
 
-function classifyPlainScalarText(text) {
+function classifyPlainScalarText(text: string) {
 	let s = text.trim()
 	if (s === "true" || s === "false") return BoolLiteral
 	if (s === "~" || s === "null") return NullLiteral
@@ -433,7 +445,7 @@ function classifyPlainScalarText(text) {
 	return Literal
 }
 
-export const literals = new ExternalTokenizer((input, stack) => {
+export const literals = new ExternalTokenizer((input: InputStream, stack: Stack<Context>) => {
 	if (input.next === 33 /* '!' */) {
 		readTag(input)
 		input.acceptToken(Tag)
@@ -446,15 +458,15 @@ export const literals = new ExternalTokenizer((input, stack) => {
 		input.acceptToken(QuotedLiteral)
 	} else {
 		let start = input.pos
-		if (readPlain(input, false, stack.context.type === type_Flow, stack.context.depth)) {
+		if (readPlain(input, false, stack.context.type === Type.Flow, stack.context.depth)) {
 			let text = input.read(start, input.pos)
 			input.acceptToken(classifyPlainScalarText(text))
 		}
 	}
 })
 
-export const blockLiteral = new ExternalTokenizer((input, stack) => {
-	let indent = stack.context.type === type_Lit ? stack.context.depth : -1, upto = input.pos
+export const blockLiteral = new ExternalTokenizer((input: InputStream, stack: Stack<Context>) => {
+	let indent = stack.context.type === Type.Lit ? stack.context.depth : -1, upto = input.pos
 	scan: for (; ;) {
 		let depth = 0, next = input.next
 		while (next === 32 /* ' ' */) next = input.peek(++depth)
