@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { checkboxSnippet, choiceSnippet, noodleSnippet, radioSnippet, textSnippet } from "./snippets";
+import { checkboxSnippet, choiceSnippet, noodleSnippet, promptSnippet, radioSnippet, textSnippet } from "./snippets";
 import { renderQuiz } from "./renderer";
 import { yamlSyntaxHighlighter } from "./syntax-highlighter/extension";
 
@@ -38,6 +38,14 @@ export default class QuizBlocksPlugin extends Plugin {
 			name: "Insert text",
 			editorCallback: (editor) => {
 				editor.replaceRange(textSnippet, editor.getCursor());
+			},
+		});
+
+		this.addCommand({
+			id: "quiz-block-insert-prompt",
+			name: "Insert prompt",
+			editorCallback: (editor) => {
+				editor.replaceRange(promptSnippet, editor.getCursor());
 			},
 		});
 

@@ -9,6 +9,7 @@
 	import QuizCheckbox from "./QuizCheckbox.svelte";
 	import QuizNoodle from "./QuizNoodle.svelte";
 	import QuizText from "./QuizText.svelte";
+	import QuizPrompt from "./QuizPrompt.svelte";
 
 	interface Props {
 		ctx: AppContext;
@@ -35,10 +36,14 @@
 <QuizGate bind:this={gate} {ctx} {stableId} {quiz}>
 	{#snippet children()}
 		<div class="quiz-title">
-			<InlineMarkdown {ctx} markdown={quiz.content}/>
+			<InlineMarkdown {ctx} markdown={quiz.content} class={
+				quiz.type === "prompt" && quizInProgress ? "mark-spoilers" : ""
+			}/>
 		</div>
 
-		{#if quiz.type === "choice"}
+		{#if quiz.type === "prompt"}
+			<QuizPrompt {ctx} {quiz} {onFinish} {onReset}/>
+		{:else if quiz.type === "choice"}
 			<QuizChoice {ctx} {quiz} {onFinish} {onReset}/>
 		{:else if quiz.type === "noodle"}
 			<QuizNoodle {ctx} {quiz} {onFinish} {onReset}/>

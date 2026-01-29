@@ -34,6 +34,18 @@ correct: >-
     
 \`\`\``;
 
+export const promptSnippet = `\`\`\`quiz
+type: prompt
+content: |-
+	The chemical symbol for water is ==H²O==.
+	
+	It freezes at ==0°C== under standard atmospheric pressure.
+
+# optional feedback shown after pressing [check]
+feedback: >-
+  Use ==double equals== to hide text until you reveal the answer.
+\`\`\``;
+
 export const choiceSnippet = `\`\`\`quiz
 type: choice
 content: >-

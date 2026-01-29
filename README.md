@@ -151,6 +151,28 @@ correct: >-
 
 </details>
 
+### `prompt` — fill in the ==gaps==
+
+<img src=".github/demo-prompt.png" width=430 alt="" />
+
+<details><summary>show code</summary>
+
+````yaml
+```quiz
+type: prompt
+content: |-
+	The chemical symbol for water is ==H²O==.
+
+	It freezes at ==0°C== under standard atmospheric pressure.
+
+# optional feedback shown after pressing [check]
+feedback: >-
+  Use ==double equals== to hide text until you reveal the answer.
+```
+````
+
+</details>
+
 ## Installation
 
 ~~Directly using this link: [`obsidian://show-plugin?id=quiz-blocks`](obsidian://show-plugin?id=quiz-blocks)~~

@@ -28,6 +28,14 @@
 	padding: 0 4px 24px;
 }
 
+.quiz-block .quiz-title p {
+	margin-top: 0;
+}
+
+.quiz-block .quiz-title p:last-of-type {
+	margin-bottom: 0;
+}
+
 .quiz-block .quiz-form {
 	display: flex;
 	flex-direction: column;
@@ -446,6 +454,35 @@
 	resize: vertical;
 	font: inherit;
 	color: inherit;
+}
+
+/* quiz-prompt */
+.quiz-prompt-feedback {
+	margin-top: 6px;
+	margin-left: 4px;
+	font-size: var(--font-smaller);
+	line-height: 1.35;
+
+	& p {
+		margin: 0;
+	}
+}
+
+.mark-spoilers mark {
+	color: transparent;
+	background: none;
+	box-shadow: none;
+	text-shadow: none;
+	display: inline-flex;
+	--quiz-prompt-blank-width: 8ch;
+	width: var(--quiz-prompt-blank-width);
+	min-width: var(--quiz-prompt-blank-width);
+	max-width: var(--quiz-prompt-blank-width);
+	box-sizing: border-box;
+	border-bottom: 1.5px solid var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	vertical-align: baseline;
 }
 
 /* gated quizzes */

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const QUIZ_TYPES = ["radio", "checkbox", "text", "choice", "noodle"] as const;
+export const QUIZ_TYPES = ["radio", "checkbox", "text", "choice", "noodle", "prompt"] as const;
 
 export const nullToUndefined = <T extends z.ZodType>(schema: T) =>
 	z.preprocess((v) => (v === null ? undefined : v), schema);
@@ -93,6 +93,12 @@ const QuizTextSchema = BaseQuizSchema.extend({
 	feedback: optionalText,
 }).strict();
 
+const QuizPromptSchema = BaseQuizSchema.extend({
+	type: z.literal("prompt"),
+	// Optional extra feedback/explanation shown after checking.
+	feedback: optionalText,
+}).strict();
+
 export const QuizSchema = z.preprocess((input) => {
 	if (typeof input !== "object" || input === null) return input;
 
@@ -103,7 +109,14 @@ export const QuizSchema = z.preprocess((input) => {
 	delete rest.question;
 
 	return { ...rest, content };
-}, z.discriminatedUnion("type", [QuizRadioSchema, QuizCheckboxSchema, QuizTextSchema, QuizChoiceSchema, QuizNoodleSchema]));
+}, z.discriminatedUnion("type", [
+	QuizRadioSchema,
+	QuizCheckboxSchema,
+	QuizTextSchema,
+	QuizChoiceSchema,
+	QuizNoodleSchema,
+	QuizPromptSchema,
+]));
 
 function enforceUniqueIds(
 	kind: "options" | "questions",
