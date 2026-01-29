@@ -10,7 +10,7 @@
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"generate-yaml-parser": "lezer-generator src/syntax-highlighter/yaml.grammar -o src/syntax-highlighter/parser",
 		"generate-yaml-parser-with-debug-symbols": "lezer-generator src/syntax-highlighter/yaml.grammar --names -o src/syntax-highlighter/parser",
-		"lint": "eslint . && svelte-check --tsconfig tsconfig.json"
+		"lint": "tsc -noEmit -skipLibCheck && eslint . && svelte-check --tsconfig tsconfig.json"
 	},
 	"devDependencies": {
 		"@eslint/js": "9.39.2",
