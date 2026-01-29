@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Quiz, QuizChoiceQuestion } from "../schemas";
+	import type { Quiz, QuizChoiceQuestion, QuizOption } from "../schemas";
 	import InlineMarkdown from "./InlineMarkdown.svelte";
 	import { type AppContext } from "../markdown";
 
@@ -13,7 +13,7 @@
 	let answers = $state<Record<number, string>>({});
 	let frozen = $state(false);
 
-	function optionId(opt: QuizChoiceQuestion): string {
+	function optionId(opt: QuizOption): string {
 		return opt.id ?? opt.content;
 	}
 

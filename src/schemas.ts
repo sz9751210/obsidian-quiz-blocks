@@ -1,27 +1,46 @@
 import { z } from "zod";
 
-export const nullToUndefined = <T extends z.ZodType>(schema: T) =>
-	z.preprocess((v) => (v === null ? undefined : v), schema.optional());
+export const QUIZ_TYPES = ["radio", "checkbox", "text", "choice", "noodle"] as const;
 
-const optionalIdSchema = z.preprocess((v) => {
+export const nullToUndefined = <T extends z.ZodType>(schema: T) =>
+	z.preprocess((v) => (v === null ? undefined : v), schema);
+
+const trimmedString = z.string().trim();
+const requiredText = nullToUndefined(trimmedString.min(1));
+const optionalText = nullToUndefined(trimmedString).default("");
+
+const idSchema = z.preprocess((v) => {
 	if (v === undefined || v === null) return undefined;
-	return typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : v;
-}, z.string().min(1).optional());
+	return typeof v === "string" || typeof v === "number" || typeof v === "boolean" ? String(v) : v;
+}, trimmedString.min(1));
+
+const optionalIdSchema = idSchema.optional();
 
 export const QuizOptionSchema = z.preprocess((input) => {
-	if (typeof input !== "object" || input === null) return input;
+	if (input === null || input === undefined) return input;
+	if (typeof input === "string" || typeof input === "number" || typeof input === "boolean") {
+		const content = String(input);
+		return { content, id: content };
+	}
+	if (typeof input !== "object") return input;
 
 	const obj = input as Record<string, unknown>;
 	const content = obj.content ?? obj.text ?? obj.answer ?? obj.option;
 	const id = obj.id ?? content ?? undefined;
 
-	return { ...obj, id, content };
+	// Strip aliases so strict() can catch real unknown keys.
+	const rest = { ...obj } as Record<string, unknown>;
+	delete rest.text;
+	delete rest.answer;
+	delete rest.option;
+
+	return { ...rest, id, content };
 }, z.object({
 	id: optionalIdSchema,
 	correct: nullToUndefined(z.boolean()).default(false),
-	content: z.string().default(""),
-	feedback: z.string().default("").transform(s => s.trim()),
-}));
+	content: requiredText,
+	feedback: optionalText,
+}).strict());
 
 export const QuizChoiceQuestionSchema = z.preprocess((input) => {
 	if (typeof input !== "object" || input === null) return input;
@@ -31,132 +50,124 @@ export const QuizChoiceQuestionSchema = z.preprocess((input) => {
 	const correct_option =
 		obj.correct_option ?? obj.correctOption ?? obj.correct ?? obj.correctId ?? obj.correct_option_id;
 
-	return { ...obj, content, correct_option };
+	// Strip aliases so strict() can catch real unknown keys.
+	const rest = { ...obj } as Record<string, unknown>;
+	delete rest.text;
+	delete rest.question;
+	delete rest.correctOption;
+	delete rest.correct;
+	delete rest.correctId;
+	delete rest.correct_option_id;
+
+	return { ...rest, content, correct_option };
 }, z.object({
 	id: optionalIdSchema,
-	content: z.string().default(""),
-	correct_option: optionalIdSchema,
-	feedback: z.string().default("").transform(s => s.trim()),
-}));
+	content: requiredText,
+	correct_option: idSchema,
+	feedback: optionalText,
+}).strict());
 
 // Common fields shared by all quizzes.
 export const BaseQuizSchema = z.object({
 	id: optionalIdSchema,
-	content: z.string().default(""),
+	content: optionalText,
 	// `gated: true` hides quiz content until started, and (when active) hides the rest of the note.
 	gated: nullToUndefined(z.boolean()).default(false),
 	// `shuffle: true` mixes options on first render and keeps the seed in the element to ensure stability.
-	shuffle: z.boolean().optional().default(false),
+	shuffle: nullToUndefined(z.boolean()).default(false),
 });
 
 /* quiz types */
 
-const QuizRadioSchema = BaseQuizSchema.extend({
-	type: z.literal("radio"),
-	options: z.array(QuizOptionSchema),
-});
+const QuizRadioSchema = createOptionQuizSchema("radio");
+const QuizCheckboxSchema = createOptionQuizSchema("checkbox");
 
-const QuizCheckboxSchema = BaseQuizSchema.extend({
-	type: z.literal("checkbox"),
-	options: z.array(QuizOptionSchema),
-});
+const QuizChoiceSchema = createPairQuizSchema("choice");
+const QuizNoodleSchema = createPairQuizSchema("noodle");
 
 const QuizTextSchema = BaseQuizSchema.extend({
 	type: z.literal("text"),
 	// Free-text quizzes can't be auto-graded (yet). This is the reference answer.
-	correct: z.string().optional().transform((s) => (s ?? "").trim()),
+	correct: optionalText,
 	// Optional extra feedback/explanation shown after checking.
-	feedback: z.string().optional().transform((s) => (s ?? "").trim()),
-});
-
-const QuizChoiceSchema = BaseQuizSchema
-	.extend({
-		type: z.literal("choice"),
-		options: z.array(QuizOptionSchema).default([]),
-		questions: z.array(QuizChoiceQuestionSchema).default([]),
-	})
-	.superRefine((quiz, ctx) => {
-		// Choice quizzes require ids for option lookup.
-		const ids = new Set<string>();
-		quiz.options.forEach((opt, i) => {
-			if (!opt.id) {
-				ctx.addIssue({
-					code: 'custom',
-					message: `options[${i}].id is required for choice quizzes`,
-					path: ["options", i, "id"],
-				});
-				return;
-			}
-
-			if (ids.has(opt.id)) {
-				ctx.addIssue({
-					code: 'custom',
-					message: `Duplicate option id: ${opt.id}`,
-					path: ["options", i, "id"],
-				});
-			}
-			ids.add(opt.id);
-		});
-
-		quiz.questions.forEach((q, i) => {
-			if (q.correct_option && !ids.has(q.correct_option)) {
-				ctx.addIssue({
-					code: 'custom',
-					message: `questions[${i}].correct_option references unknown option id: ${q.correct_option}`,
-					path: ["questions", i, "correct_option"],
-				});
-			}
-		});
-	});
-
-const QuizNoodleSchema = BaseQuizSchema
-	.extend({
-		type: z.literal("noodle"),
-		options: z.array(QuizOptionSchema).default([]),
-		questions: z.array(QuizChoiceQuestionSchema).default([]),
-	})
-	.superRefine((quiz, ctx) => {
-		// Noodle quizzes require ids for option lookup.
-		const ids = new Set<string>();
-		quiz.options.forEach((opt, i) => {
-			if (!opt.id) {
-				ctx.addIssue({
-					code: "custom",
-					message: `options[${i}].id is required for noodle quizzes`,
-					path: ["options", i, "id"],
-				});
-				return;
-			}
-
-			if (ids.has(opt.id)) {
-				ctx.addIssue({
-					code: "custom",
-					message: `Duplicate option id: ${opt.id}`,
-					path: ["options", i, "id"],
-				});
-			}
-			ids.add(opt.id);
-		});
-
-		quiz.questions.forEach((q, i) => {
-			if (q.correct_option && !ids.has(q.correct_option)) {
-				ctx.addIssue({
-					code: "custom",
-					message: `questions[${i}].correct_option references unknown option id: ${q.correct_option}`,
-					path: ["questions", i, "correct_option"],
-				});
-			}
-		});
-	});
+	feedback: optionalText,
+}).strict();
 
 export const QuizSchema = z.preprocess((input) => {
 	if (typeof input !== "object" || input === null) return input;
 
 	const obj = input as Record<string, unknown>;
 	const content = obj.content ?? obj.text ?? obj.question;
+	const rest = { ...obj } as Record<string, unknown>;
+	delete rest.text;
+	delete rest.question;
 
-	return { ...obj, content };
+	return { ...rest, content };
 }, z.discriminatedUnion("type", [QuizRadioSchema, QuizCheckboxSchema, QuizTextSchema, QuizChoiceSchema, QuizNoodleSchema]));
+
+function enforceUniqueIds(
+	kind: "options" | "questions",
+	items: Array<{ id?: string }>,
+	ctx: z.RefinementCtx,
+	message: (id: string) => string
+): Set<string> {
+	const ids = new Set<string>();
+	items.forEach((item, i) => {
+		if (!item.id) return;
+		if (ids.has(item.id)) {
+			ctx.addIssue({
+				code: "custom",
+				message: message(item.id),
+				path: [kind, i, "id"],
+			});
+		} else {
+			ids.add(item.id);
+		}
+	});
+	return ids;
+}
+
+function optionIdDuplicateMessage(id: string): string {
+	return `Duplicate option id: ${id}. Add explicit ids or make content unique.`;
+}
+
+function questionIdDuplicateMessage(id: string): string {
+	return `Duplicate question id: ${id}.`;
+}
+
+function createOptionQuizSchema<T extends "radio" | "checkbox">(type: T) {
+	return BaseQuizSchema.extend({
+		type: z.literal(type),
+		options: z.array(QuizOptionSchema).min(1),
+	})
+		.strict()
+		.superRefine((quiz, ctx) => {
+			enforceUniqueIds("options", quiz.options, ctx, optionIdDuplicateMessage);
+		});
+}
+
+function createPairQuizSchema<T extends "choice" | "noodle">(type: T) {
+	return BaseQuizSchema.extend({
+		type: z.literal(type),
+		options: z.array(QuizOptionSchema).min(1),
+		questions: z.array(QuizChoiceQuestionSchema).min(1),
+	})
+		.strict()
+		.superRefine((quiz, ctx) => {
+			const ids = enforceUniqueIds("options", quiz.options, ctx, optionIdDuplicateMessage);
+			enforceUniqueIds("questions", quiz.questions, ctx, questionIdDuplicateMessage);
+
+			quiz.questions.forEach((q, i) => {
+				if (!ids.has(q.correct_option)) {
+					ctx.addIssue({
+						code: "custom",
+						message: `questions[${i}].correct_option references unknown option id: ${q.correct_option}`,
+						path: ["questions", i, "correct_option"],
+					});
+				}
+			});
+		});
+}
 
 export type QuizOption = z.infer<typeof QuizOptionSchema>;
 export type QuizChoiceQuestion = z.infer<typeof QuizChoiceQuestionSchema>;

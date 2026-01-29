@@ -54,7 +54,7 @@ export function renderQuiz({ app, component, source, el, ctx }: RenderArgs) {
 		quiz = parseQuizBlock(source, tabSize);
 	} catch (e) {
 		const pre = el.createEl("pre", { cls: "quiz-block-error" });
-		pre.textContent = String(e);
+		pre.textContent = e instanceof Error ? e.message : String(e);
 		return;
 	}
 

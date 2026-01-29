@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Quiz, QuizChoiceQuestion } from "../schemas";
+	import type { Quiz, QuizOption } from "../schemas";
 	import InlineMarkdown from "./InlineMarkdown.svelte";
 	import { type AppContext } from "../markdown";
 
@@ -41,7 +41,7 @@
 
 	let centers = $state<Record<string, { x: number; y: number }>>({});
 
-	const optionId = (opt: QuizChoiceQuestion): string => opt.id ?? opt.content;
+	const optionId = (opt: QuizOption): string => opt.id ?? opt.content;
 	const questionId = (i: number): string => quiz.questions[i]?.id ?? `q-${i}`;
 	const key = (side: Side, id: string): string => `${side}:${id}`;
 	const pairKey = (p: Pair) => `${p.left}->${p.right}`;
