@@ -9,10 +9,11 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "text" }>;
 		stableId: string;
-		finish: () => void;
+		onFinish: () => void;
+		onReset: () => void;
 	}
 
-	let { ctx, stableId, quiz, finish }: Props = $props();
+	let { ctx, stableId, quiz, onFinish, onReset }: Props = $props();
 	let answer = $state("");
 	let frozen = $state(false);
 	let textarea: Element;
@@ -22,14 +23,15 @@
 		// and reveals the reference answer (if provided).
 		if (answer.trim().length === 0) return;
 		frozen = true;
-		finish();
+		onFinish();
 	}
 
-	async function onReset() {
+	async function reset() {
 		answer = "";
 		frozen = false;
 		await tick();
 		autosize.update(textarea);
+		onReset();
 	}
 </script>
 
@@ -64,7 +66,7 @@
 			Check
 		</button>
 	{:else}
-		<button class="quiz-reset" type="button" onclick={onReset} aria-label="Reset quiz" title="Reset quiz">
+		<button class="quiz-reset" type="button" onclick={reset} aria-label="Reset quiz" title="Reset quiz">
 			↻
 		</button>
 	{/if}

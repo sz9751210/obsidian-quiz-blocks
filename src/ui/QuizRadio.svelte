@@ -8,10 +8,11 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "radio" }>;
 		stableId: string;
-		finish: () => void;
+		onFinish: () => void;
+		onReset: () => void;
 	}
 
-	let { ctx, stableId, quiz, finish }: Props = $props();
+	let { ctx, stableId, quiz, onFinish, onReset }: Props = $props();
 	let selectedId = $state<string | null>(null);
 	let frozen = $state(false);
 
@@ -27,12 +28,13 @@
 	function onCheck() {
 		if (!selectedId) return;
 		frozen = true;
-		finish();
+		onFinish();
 	}
 
-	function onReset() {
+	function reset() {
 		selectedId = null;
 		frozen = false;
+		onReset();
 	}
 </script>
 
@@ -90,7 +92,7 @@
 			Check
 		</button>
 	{:else}
-		<button class="quiz-reset" type="button" onclick={onReset} aria-label="Reset quiz" title="Reset quiz">
+		<button class="quiz-reset" type="button" onclick={reset} aria-label="Reset quiz" title="Reset quiz">
 			↻
 		</button>
 	{/if}

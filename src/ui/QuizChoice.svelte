@@ -6,10 +6,11 @@
 	interface Props {
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "choice" }>;
-		finish: () => void;
+		onFinish: () => void;
+		onReset: () => void;
 	}
 
-	let { ctx, quiz, finish }: Props = $props();
+	let { ctx, quiz, onFinish, onReset }: Props = $props();
 	let answers = $state<Record<number, string>>({});
 	let frozen = $state(false);
 
@@ -25,12 +26,13 @@
 
 	function onCheck() {
 		frozen = true;
-		finish();
+		onFinish();
 	}
 
-	function onReset() {
+	function reset() {
 		answers = {};
 		frozen = false;
+		onReset();
 	}
 
 	function selectedOption(id?: string) {
@@ -104,7 +106,7 @@
 			{/if}
 		</button>
 	{:else}
-		<button class="quiz-reset" type="button" onclick={onReset} aria-label="Reset quiz" title="Reset quiz">
+		<button class="quiz-reset" type="button" onclick={reset} aria-label="Reset quiz" title="Reset quiz">
 			↻
 		</button>
 	{/if}

@@ -9,10 +9,11 @@
 	interface Props {
 		ctx: AppContext;
 		quiz: Extract<Quiz, { type: "noodle" }>;
-		finish: () => void;
+		onFinish: () => void;
+		onReset: () => void;
 	}
 
-	let { ctx, quiz, finish }: Props = $props();
+	let { ctx, quiz, onFinish, onReset }: Props = $props();
 
 	let pairs = $state<Pair[]>([]);
 	let frozen = $state(false);
@@ -380,16 +381,17 @@
 		pending = null;
 		dragging = false;
 		hoverTarget = null;
-		finish();
+		onFinish();
 	}
 
-	function onReset() {
+	function reset() {
 		pairs = [];
 		frozen = false;
 		pending = null;
 		dragging = false;
 		hoverTarget = null;
 		hoveredPairKey = null;
+		onReset();
 	}
 
 	// Action: register pin elements (center points)
@@ -606,7 +608,7 @@
 			{/if}
 		</button>
 	{:else}
-		<button class="quiz-reset" type="button" onclick={onReset} aria-label="Reset quiz" title="Reset quiz">
+		<button class="quiz-reset" type="button" onclick={reset} aria-label="Reset quiz" title="Reset quiz">
 			↻
 		</button>
 	{/if}

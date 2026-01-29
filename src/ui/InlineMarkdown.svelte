@@ -4,11 +4,11 @@
 	interface Props {
 		ctx: AppContext,
 		markdown?: string;
-		cls?: string;
+		class?: string | string[];
 		asPlainText?: boolean;
 	}
 
-	let { ctx, markdown, cls, asPlainText = false }: Props = $props();
+	let { ctx, markdown, class: cls = '', asPlainText = false }: Props = $props();
 	let host: HTMLDivElement;
 
 	async function render() {
@@ -24,4 +24,4 @@
 	});
 </script>
 
-<div class={cls ?? ""} bind:this={host}></div>
+<div class={cls} bind:this={host}></div>
