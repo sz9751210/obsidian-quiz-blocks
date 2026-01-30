@@ -17,53 +17,22 @@ export default class QuizBlocksPlugin extends Plugin {
 			});
 		});
 
-		this.addCommand({
-			id: "quiz-block-insert-radio",
-			name: "Insert radio",
-			editorCallback: (editor) => {
-				editor.replaceRange(radioSnippet, editor.getCursor());
-			},
-		});
+		const snippets = [
+			{ id: "quiz-block-insert-radio", name: "Insert radio", snippet: radioSnippet },
+			{ id: "quiz-block-insert-checkbox", name: "Insert checkbox", snippet: checkboxSnippet },
+			{ id: "quiz-block-insert-text", name: "Insert text", snippet: textSnippet },
+			{ id: "quiz-block-insert-prompt", name: "Insert prompt", snippet: promptSnippet },
+			{ id: "quiz-block-insert-choice", name: "Insert choice", snippet: choiceSnippet },
+			{ id: "quiz-block-insert-noodle", name: "Insert noodle", snippet: noodleSnippet },
+		];
 
-		this.addCommand({
-			id: "quiz-block-insert-checkbox",
-			name: "Insert checkbox",
-			editorCallback: (editor) => {
-				editor.replaceRange(checkboxSnippet, editor.getCursor());
-			},
-		});
-
-		this.addCommand({
-			id: "quiz-block-insert-text",
-			name: "Insert text",
-			editorCallback: (editor) => {
-				editor.replaceRange(textSnippet, editor.getCursor());
-			},
-		});
-
-		this.addCommand({
-			id: "quiz-block-insert-prompt",
-			name: "Insert prompt",
-			editorCallback: (editor) => {
-				editor.replaceRange(promptSnippet, editor.getCursor());
-			},
-		});
-
-		this.addCommand({
-			id: "quiz-block-insert-choice",
-			name: "Insert choice",
-			editorCallback: (editor) => {
-				editor.replaceRange(choiceSnippet, editor.getCursor());
-			},
-		});
-
-		this.addCommand({
-			id: "quiz-block-insert-noodle",
-			name: "Insert noodle",
-			editorCallback: (editor) => {
-				editor.replaceRange(noodleSnippet, editor.getCursor());
-			},
-		});
+		for (let { id, name, snippet } of snippets) {
+			this.addCommand({
+				id,
+				name,
+				editorCallback: editor => editor.replaceRange(snippet, editor.getCursor()),
+			});
+		}
 	}
 }
 
