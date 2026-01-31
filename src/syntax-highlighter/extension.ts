@@ -1,9 +1,9 @@
 import { yamlLanguage } from "./language";
-import { Line, Range, Text } from "@codemirror/state";
+import type { Line, Range, Text } from "@codemirror/state";
 import {
 	Decoration,
 	type DecorationSet,
-	EditorView,
+	type EditorView,
 	type PluginSpec,
 	type PluginValue,
 	ViewPlugin,

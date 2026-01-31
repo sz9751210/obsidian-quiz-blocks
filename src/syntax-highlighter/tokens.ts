@@ -1,5 +1,4 @@
-import { ContextTracker, ExternalTokenizer, InputStream } from "@lezer/lr"
-import type { Stack as LrStack } from "@lezer/lr"
+import { ContextTracker, ExternalTokenizer, type InputStream, type Stack as LrStack } from "@lezer/lr"
 import {
 	Alias,
 	Anchor,

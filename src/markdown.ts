@@ -1,4 +1,4 @@
-import { App, Component, MarkdownRenderer } from "obsidian";
+import { type App, type Component, MarkdownRenderer } from "obsidian";
 
 export interface AppContext {
 	app: App,

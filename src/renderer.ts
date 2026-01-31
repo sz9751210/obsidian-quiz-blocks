@@ -1,4 +1,4 @@
-import { App, Component, type MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
+import { type App, type Component, type MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
 import { parseQuizBlock } from "./parse";
 import type { Quiz } from "./schemas";
 import { mount, unmount } from "svelte";
