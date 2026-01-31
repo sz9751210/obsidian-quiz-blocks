@@ -1,0 +1,104 @@
+.quiz-option {
+	padding: 0 8px;
+	border-radius: 8px;
+	margin: 0;
+
+	:global(p) {
+		margin: 0;
+	}
+}
+
+.option-label {
+	display: inline-flex;
+	align-items: flex-start;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.option-feedback {
+	margin-left: 32px; /* a bit more, because control is 24px + gap */
+	margin-top: 4px;
+	font-size: var(--font-smaller);
+	line-height: 1.35;
+
+	:global(p) {
+		margin: 0;
+	}
+
+	&.is-correct {
+		color: var(--quiz-right);
+	}
+
+	&.is-wrong {
+		color: var(--quiz-wrong);
+	}
+}
+
+.visually-hidden {
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	display: inline-block;
+	opacity: 0;
+	pointer-events: none;
+	clip: auto;
+	white-space: nowrap;
+	border: 0;
+}
+
+.option-indicator {
+	align-self: flex-start;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+
+	width: 24px;
+	height: 24px;
+
+	box-sizing: border-box;
+	overflow: hidden;
+	position: relative;
+
+	&:global(.radio) {
+		border-radius: 100px;
+	}
+
+	&:global(.checkbox) {
+		border-radius: 6px;
+	}
+
+	transition: color, background-color 0.2s ease-in-out;
+
+	/* neutral ring */
+	color: var(--text-normal);
+	box-shadow: var(--background-modifier-border-hover) 0 0 0 1.5px inset;
+
+	&:not(.frozen).selected {
+		/* (✓) selected, still unanswered */
+		background-color: rgba(255, 255, 255, 0.12);
+	}
+
+	&.frozen.selected.correct {
+		/* (✓) correct */
+		background-color: var(--quiz-right);
+		box-shadow: var(--quiz-right) 0 0 0 1.5px inset;
+		color: white;
+	}
+
+	&.frozen:not(.selected).correct {
+		/* (–) missed */
+		background-color: transparent;
+		box-shadow: var(--quiz-right) 0 0 0 1.5px inset;
+		color: var(--quiz-right);
+	}
+
+	&.frozen.selected:not(.correct) {
+		/* (⨯) mistaken */
+		background-color: var(--quiz-wrong);
+		box-shadow: var(--quiz-wrong) 0 0 0 1.5px inset;
+		color: white;
+	}
+}

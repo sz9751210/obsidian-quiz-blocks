@@ -26,7 +26,7 @@
 </script>
 
 {#if checked && quiz.feedback && quiz.feedback.trim().length > 0}
-	<div class="quiz-prompt-feedback">
+	<div class="feedback">
 		<InlineMarkdown {ctx} markdown={quiz.feedback}/>
 	</div>
 {/if}
@@ -42,3 +42,16 @@
 		</button>
 	{/if}
 </div>
+
+<style>
+	.feedback {
+		margin-top: 6px;
+		margin-left: 4px;
+		font-size: var(--font-smaller);
+		line-height: 1.35;
+
+		& :global(p) {
+			margin: 0;
+		}
+	}
+</style>

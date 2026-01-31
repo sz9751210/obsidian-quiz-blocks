@@ -1,4 +1,5 @@
 <script lang="ts">
+	import "./QuizOption.css";
 	import type { Quiz, QuizOption } from "../schemas";
 	import InlineMarkdown from "./InlineMarkdown.svelte";
 	import type { AppContext } from "../markdown";
@@ -48,19 +49,17 @@
 	{#each quiz.options as opt (optionId(opt))}
 		{@const id = optionId(opt)}
 		{@const selected = has(id)}
-		{@const correct = frozen && opt.correct}
 		{@const checked = frozen && opt.correct || selected}
 		{@const missed = frozen && opt.correct && !selected}
 		{@const mistaken = frozen && !opt.correct && selected}
 
 		<div class="quiz-option">
-			<label class="quiz-option-label">
+			<label class="option-label">
 				<div
-					class={["radio", "quiz-form-choice__control", "checkbox", missed ? "radio_view_outline" : "radio_view_default"]}
-					class:radio_disabled={frozen}
-					class:radio_checked={checked}
-					class:quiz-radio--correct={correct}
-					class:quiz-radio--mistake={mistaken}
+					class={["option-indicator", "checkbox"]}
+					class:frozen={frozen}
+					class:correct={opt.correct}
+					class:selected={selected}
 				>
 					<span class="visually-hidden">
 						<input
@@ -74,7 +73,7 @@
 						/>
 					</span>
 
-					<div class="radio__icon-host">
+					<div class="icon-host">
 						<Icon icon={mistaken ? "close" : (missed ? "minus" : (selected ? "tick" : "none"))}/>
 					</div>
 				</div>
@@ -84,8 +83,8 @@
 				</span>
 			</label>
 
-			{#if opt.feedback && frozen && (correct || selected)}
-				<div class="quiz-option-feedback" class:is-correct={correct} class:is-wrong={!correct}>
+			{#if opt.feedback && frozen && (opt.correct || selected)}
+				<div class="option-feedback" class:is-correct={opt.correct} class:is-wrong={!opt.correct}>
 					<InlineMarkdown {ctx} markdown={opt.feedback}/>
 				</div>
 			{/if}
@@ -104,3 +103,7 @@
 		</button>
 	{/if}
 </div>
+
+<style>
+	@import "./QuizOption.css";
+</style>

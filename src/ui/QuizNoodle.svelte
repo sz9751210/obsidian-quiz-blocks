@@ -613,3 +613,7 @@
 		</button>
 	{/if}
 </div>
+
+<style>
+	@import "QuizNoodle.css";
+</style>

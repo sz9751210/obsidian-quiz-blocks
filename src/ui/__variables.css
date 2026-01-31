@@ -1,0 +1,14 @@
+.quiz-block {
+	--quiz-right: rgba(28, 156, 117);
+	--quiz-wrong: rgba(255, 59, 48);
+
+	--quiz-block-border-color: var(--background-modifier-border);
+	--quiz-noodle-line-color: var(--text-normal);
+
+	/*@media (prefers-color-scheme: dark)*/
+	--quiz-accent-color: white;
+
+	@media (prefers-color-scheme: light) {
+		--quiz-accent-color: var(--text-normal);
+	}
+}

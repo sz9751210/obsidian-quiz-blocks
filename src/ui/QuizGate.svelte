@@ -235,36 +235,5 @@
 </div>
 
 <style>
-	.quiz-block {
-		position: relative;
-		outline: none;
-	}
-
-	.quiz-inner--hidden {
-		visibility: hidden;
-	}
-
-	.quiz-gate-overlay {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 1rem;
-		z-index: 2;
-	}
-
-	.quiz-gate-button {
-		padding: 0.5rem 0.9rem;
-		border-radius: 8px;
-	}
-
-	.quiz-gate-hint {
-		font-size: 0.85em;
-		opacity: 0.75;
-		text-align: center;
-		max-width: 42ch;
-	}
+	@import "QuizGate.css";
 </style>

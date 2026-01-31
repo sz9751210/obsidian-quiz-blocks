@@ -37,7 +37,6 @@
 
 <form class="quiz-form">
 	<textarea
-		class="quiz-textarea"
 		name={stableId}
 		disabled={frozen}
 		rows={4}
@@ -71,3 +70,14 @@
 		</button>
 	{/if}
 </div>
+
+<style>
+	textarea {
+		width: 100%;
+		max-width: 100%;
+		min-height: 96px;
+		resize: vertical;
+		font: inherit;
+		color: inherit;
+	}
+</style>

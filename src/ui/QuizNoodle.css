@@ -1,0 +1,220 @@
+.quiz-noodle {
+	position: relative;
+	user-select: none;
+
+	& :global(*) {
+		user-select: none;
+	}
+
+	.quiz-noodle-lines {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		overflow: visible;
+	}
+
+	.quiz-noodle-lists {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 60px;
+	}
+
+	.quiz-noodle-list {
+		margin: 0;
+	}
+
+	.quiz-noodle-items {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.quiz-noodle-item-row {
+		margin: 0;
+	}
+
+	.quiz-noodle-item {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 12px;
+		border-radius: 10px;
+		border: 1px solid var(--background-modifier-border);
+		background: var(--background-primary);
+		color: var(--text-normal);
+		cursor: pointer;
+		text-align: left;
+		font-size: inherit;
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.85;
+		}
+
+		/* Only normal selection ring, NOT green/red box borders */
+
+		&.is-active {
+			box-shadow: 0 0 0 2px var(--quiz-accent-color) inset;
+		}
+
+		&.is-target {
+			box-shadow: 0 0 0 2px var(--quiz-accent-color) inset;
+		}
+
+		&.quiz-noodle-item--left {
+			justify-content: flex-end; /* pin + label */
+		}
+
+		&.quiz-noodle-item--right {
+			justify-content: flex-start;
+		}
+	}
+
+	.quiz-noodle-label :global(p) {
+		margin: 0;
+	}
+
+	/* --- pin / circle --- */
+
+	.quiz-noodle-pin {
+		flex: 0 0 auto;
+		width: 16px;
+		height: 16px;
+		border-radius: 999px;
+
+		--pin-border: 1.5px;
+		box-shadow: var(--quiz-accent-color) 0 0 0 var(--pin-border) inset;
+		background: transparent;
+
+		transition: background-color 120ms ease,
+		box-shadow 120ms ease,
+		transform 120ms ease;
+	}
+
+	/* Hover on pin OR hover on the whole box highlights the pin */
+
+	.quiz-noodle-pin:hover,
+	.quiz-noodle-item:hover .quiz-noodle-pin {
+		background: rgba(255, 255, 255, 0.10);
+	}
+
+	.quiz-noodle-pin {
+		&.is-connected {
+			/* When connected: subtle filled pin */
+			background: rgba(255, 255, 255, 0.14);
+		}
+
+		&.is-start {
+			/* Starting pin while constructing */
+			transform: scale(1.08);
+			box-shadow: var(--quiz-accent-color) 0 0 0 var(--pin-border) inset,
+			0 0 0 2px rgba(255, 255, 255, 0.06);
+			background: rgba(255, 255, 255, 0.16);
+		}
+
+		&.is-target {
+			/* Target pin while snapping */
+			transform: scale(1.10);
+			box-shadow: var(--quiz-accent-color) 0 0 0 var(--pin-border) inset;
+			background: rgba(255, 255, 255, 0.18);
+		}
+
+		/* Frozen correctness shown ONLY via pin + noodle */
+
+		&.is-correct {
+			box-shadow: var(--quiz-right) 0 0 0 var(--pin-border) inset;
+			background: rgba(28, 156, 117, 0.18);
+		}
+
+		&.is-wrong {
+			box-shadow: var(--quiz-wrong) 0 0 0 var(--pin-border) inset;
+			background: rgba(255, 59, 48, 0.18);
+		}
+	}
+
+	.quiz-noodle-feedback {
+		margin-top: 6px;
+		margin-left: 4px;
+		font-size: var(--font-smaller);
+		line-height: 1.35;
+
+		&.is-correct {
+			color: var(--quiz-right);
+		}
+
+		&.is-wrong {
+			color: var(--quiz-wrong);
+		}
+
+		& :global(p) {
+			margin: 0;
+		}
+	}
+
+	/* --- noodle (SVG) --- */
+
+	.quiz-noodle-line {
+		pointer-events: all; /* allow cutting */
+		cursor: col-resize; /* cutting cursor */
+	}
+
+	.quiz-noodle-line:hover .quiz-noodle-line-body,
+	.quiz-noodle-line:focus-within .quiz-noodle-line-body {
+		filter: brightness(0.7);
+	}
+
+	/* hit area total 5px (2px visible + ~3px invisible) */
+
+	.quiz-noodle-line-hit {
+		fill: none;
+		stroke: transparent;
+		stroke-width: 8;
+		stroke-linecap: round;
+	}
+
+	/* Border stroke makes noodle readable at intersections */
+
+	.quiz-noodle-line-border {
+		fill: none;
+		stroke: var(--background-primary);
+		stroke-width: 4;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.quiz-noodle-line-body {
+		fill: none;
+		stroke: var(--quiz-accent-color);
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	/* Pending noodle: slightly different look */
+
+	.quiz-noodle-line--pending .quiz-noodle-line-body {
+		stroke-dasharray: 6 6;
+		opacity: 0.9;
+	}
+
+	.quiz-noodle-line {
+		&.is-correct .quiz-noodle-line-body {
+			stroke: var(--quiz-right);
+		}
+
+		&.is-wrong .quiz-noodle-line-body {
+			stroke: var(--quiz-wrong);
+		}
+	}
+
+	&.is-dragging, &.is-constructing {
+		/* no text-selection cursor while dragging */
+		cursor: pointer;
+	}
+}

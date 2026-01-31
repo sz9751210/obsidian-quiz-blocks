@@ -1,4 +1,7 @@
-/* List of variables defined at runtime by obsidian theme. */
+/*
+Variables defined at runtime by the Obsidian theme.
+This file isn’t used by the project; it only exists to help IDEs suggest variable names.
+*/
 
 :root {
 	--safe-area-inset-top: env(safe-area-inset-top);

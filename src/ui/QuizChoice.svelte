@@ -111,3 +111,7 @@
 		</button>
 	{/if}
 </div>
+
+<style>
+	@import "QuizChoice.css";
+</style>
