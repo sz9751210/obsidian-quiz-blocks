@@ -8,6 +8,7 @@ export default tseslint.config(
 	globalIgnores([
 		"node_modules",
 		"dist",
+		"_test-vault",
 		"esbuild.config.mjs",
 		"eslint.config.*",
 		"version-bump.mjs",

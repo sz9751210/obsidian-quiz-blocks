@@ -17,6 +17,10 @@ main.js
 
 # obsidian
 data.json
+_test-vault/.obsidian/workspace.json
+_test-vault/.obsidian/plugins/quiz-blocks/*.css
+_test-vault/.obsidian/plugins/quiz-blocks/*.js
+_test-vault/.obsidian/plugins/quiz-blocks/*.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
