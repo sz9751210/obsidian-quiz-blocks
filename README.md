@@ -1,4 +1,4 @@
-# Quiz blocks [![plugin](https://img.shields.io/github/v/release/xamgore/obsidian-quiz-blocks?label=plugin&display_name=tag&logo=obsidian&color=purple&logoColor=violet)](obsidian://show-plugin?id=quiz-blocks)
+# Quiz blocks [![plugin](https://img.shields.io/github/v/release/xamgore/obsidian-quiz-blocks?label=plugin&display_name=tag&logo=obsidian&color=purple&logoColor=violet)](https://obsidian.md/plugins?id=quiz-blocks)
 
 Render ` ```quiz ` code blocks into interactive multiple-choice quizzes directly inside Obsidian notes.
 
@@ -175,9 +175,40 @@ feedback: >-
 
 ## Installation
 
-~~Directly using this link: [`obsidian://show-plugin?id=quiz-blocks`](obsidian://show-plugin?id=quiz-blocks)~~
+**Quiz Blocks** is currently waiting for approval to appear in the official Obsidian Community Plugins list.
+Until then, it can be installed and automatically updated using **BRAT** or manually.
 
-#### Install from Obsidian Community Plugins
+#### Install using BRAT (beta-channel)
+
+<details><summary>show steps</summary>
+
+1. Install the **BRAT** plugin:
+	* Using the link: https://obsidian.md/plugins?id=obsidian42-brat
+      * Click **Install**, then **Enable**
+    * Manually:
+      * Open **Settings → Community plugins → Browse**
+      * Search for **BRAT**
+      * Click **Install**, then **Enable**
+2. Open **Settings → BRAT**.
+3. Click **Add Beta plugin**.
+4. Paste this repository URL:
+   ```
+   https://github.com/xamgore/obsidian-quiz-blocks
+   ```
+5. Click **Add plugin**.
+6. Go to **Settings → Community plugins** and enable **Quiz Blocks**.
+
+</details>
+
+#### ~~Install by link~~
+
+<details><summary>show steps</summary>
+
+1. Click https://obsidian.md/plugins?id=quiz-blocks
+2. Click **Install**, then **Enable**.
+</details>
+
+#### ~~Install from Obsidian Community Plugins~~
 
 <details><summary>show steps</summary>
 
@@ -192,7 +223,7 @@ feedback: >-
 
 <details><summary>show steps</summary>
 
-1. Download the latest release from the
+1. Download `obsidian-quiz-blocks.zip` from the
    [GitHub releases page](https://github.com/xamgore/obsidian-quiz-blocks/releases).
 2. Extract the downloaded ZIP file.
 3. Copy the extracted folder into your vault’s plugin directory:
