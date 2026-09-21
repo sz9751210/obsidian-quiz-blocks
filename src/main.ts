@@ -1,10 +1,35 @@
 import { Plugin } from "obsidian";
-import { checkboxSnippet, choiceSnippet, noodleSnippet, promptSnippet, radioSnippet, textSnippet } from "./snippets";
+import { DEFAULT_SETTINGS, QUIZ_TEMPLATES, readSettings, type QuizSettings } from "./snippets";
 import { renderQuiz } from "./renderer";
 import { yamlSyntaxHighlighter } from "./syntax-highlighter/extension";
+import { QuizBankModal } from "./quiz-bank-modal";
+import { insertTemplate, QuizTemplateSuggest, TemplatePicker } from "./authoring";
+import { QuizSettingTab } from "./settings";
+import "./ui/authoring.css";
 
 export default class QuizBlocksPlugin extends Plugin {
-	onload() {
+	private bankModal?: QuizBankModal;
+	settings: QuizSettings = { ...DEFAULT_SETTINGS };
+
+	async onload() {
+		this.settings = readSettings(await this.loadData());
+		this.applyStyle();
+		this.register(() => delete document.body.dataset.quizBlocksStyle);
+		this.addSettingTab(new QuizSettingTab(this));
+		this.registerEditorSuggest(new QuizTemplateSuggest(this.app, () => this.settings));
+		this.addCommand({
+			id: "insert-quiz-template", name: "Insert quiz template",
+			editorCallback: editor => new TemplatePicker(this.app, editor, this.settings).open(),
+		});
+		this.register(() => this.bankModal?.close());
+		const openBank = () => {
+			this.bankModal?.close();
+			this.bankModal = new QuizBankModal(this.app);
+			this.bankModal.open();
+		};
+		this.addCommand({ id: "start-quiz-from-bank", name: "Start quiz from note or tag", callback: openBank });
+		this.addRibbonIcon("list-checks", "Start quiz from note or tag", openBank);
+
 		this.registerEditorExtension(yamlSyntaxHighlighter);
 
 		this.registerMarkdownCodeBlockProcessor("quiz", (source, el, ctx) => {
@@ -17,22 +42,22 @@ export default class QuizBlocksPlugin extends Plugin {
 			});
 		});
 
-		const snippets = [
-			{ id: "quiz-block-insert-radio", name: "Insert radio", snippet: radioSnippet },
-			{ id: "quiz-block-insert-checkbox", name: "Insert checkbox", snippet: checkboxSnippet },
-			{ id: "quiz-block-insert-text", name: "Insert text", snippet: textSnippet },
-			{ id: "quiz-block-insert-prompt", name: "Insert prompt", snippet: promptSnippet },
-			{ id: "quiz-block-insert-choice", name: "Insert choice", snippet: choiceSnippet },
-			{ id: "quiz-block-insert-noodle", name: "Insert noodle", snippet: noodleSnippet },
-		];
-
-		for (let { id, name, snippet } of snippets) {
+		for (const template of QUIZ_TEMPLATES) {
 			this.addCommand({
-				id,
-				name,
-				editorCallback: editor => editor.replaceRange(snippet, editor.getCursor()),
+				id: `quiz-block-insert-${template.type}`,
+				name: `Insert ${template.type}`,
+				editorCallback: editor => insertTemplate(editor, template, this.settings),
 			});
 		}
+	}
+
+	private applyStyle() {
+		document.body.dataset.quizBlocksStyle = this.settings.style;
+	}
+
+	async saveSettings() {
+		this.applyStyle();
+		await this.saveData(this.settings);
 	}
 }
 

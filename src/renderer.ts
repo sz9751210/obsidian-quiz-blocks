@@ -21,7 +21,7 @@ type Props = {
 	stableId: string;
 };
 
-class QuizSvelteChild extends MarkdownRenderChild {
+export class QuizSvelteChild extends MarkdownRenderChild {
 	private instance: unknown;
 	readonly props: Props;
 
@@ -31,6 +31,7 @@ class QuizSvelteChild extends MarkdownRenderChild {
 	}
 
 	onload() {
+		this.props.ctx.component = this;
 		this.instance = mount(QuizRenderer, {
 			target: this.containerEl,
 			props: this.props,

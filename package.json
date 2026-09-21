@@ -5,8 +5,12 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
+		"test": "node --test tests/*.test.mjs",
 		"dev": "vite build --mode development --watch",
 		"build": "vite build --mode production",
+		"deploy": "node scripts/deploy.mjs",
+		"deploy:interactive": "node scripts/deploy.mjs --interactive",
+		"deploy:demo": "node scripts/deploy.mjs",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"generate-yaml-parser": "lezer-generator src/syntax-highlighter/yaml.grammar -o src/syntax-highlighter/parser",
 		"generate-yaml-parser-with-debug-symbols": "lezer-generator src/syntax-highlighter/yaml.grammar --names -o src/syntax-highlighter/parser",

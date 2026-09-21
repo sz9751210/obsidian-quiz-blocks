@@ -12,6 +12,36 @@ There is a **Check** button that highlights right, wrong, and missed answers,
 with optional `feedback` commentary. Great for self-education and learning notes.
 
 
+## 快速建立題目與設定
+
+在筆記編輯模式的**獨立空白行**輸入 `quiz:`，使用方向鍵選擇題型後按 Enter，就會展開完整的 `quiz` YAML 區塊並選取題目文字，讓你直接改題。也可從指令面板執行 **Insert quiz template**，原有的各題型插入指令仍可使用。
+
+| 快速語法 | 題型 |
+| --- | --- |
+| `quiz:radio`（也接受 `quiz:ratio`） | 單選題 |
+| `quiz:checkbox` | 多選題 |
+| `quiz:text` | 簡答題 |
+| `quiz:prompt` | 填空題，用 `==答案==` 標記空格 |
+| `quiz:choice` | 下拉配對題 |
+| `quiz:noodle` | 連線配對題 |
+
+這些是**編輯時展開範本的捷徑**，必須選取建議項目才會插入；不是新的 Markdown 區塊格式。在 YAML 屬性、程式碼區塊或一般句子內不會觸發。
+
+開啟 **設定 → Quiz blocks**，可切換快速語法、選擇預設／卡片／精簡樣式，並設定新範本是否打亂選項或隱藏題目。樣式立即套用；範本預設只影響之後插入或複製的題目。設定頁提供六種可直接作答的範本、互動預覽、完整語法、複製及插入目前筆記按鈕。每個範本都已附上有效的範例答案，請依自己的題目修改。
+
+設定分成 **一般設定**、**外觀**、**範本** 三個分頁，首次開啟顯示外觀。「外觀」的樣式選單下方提供即時互動預覽，可切換六種題型並試答；調整樣式時保留試答狀態。「範本」集中提供複製、插入及完整語法。切換分頁或題型會重設預覽作答，分頁可用左右方向鍵切換。
+
+## Start a quiz from a note or tag
+
+1. Run **Quiz blocks: Start quiz from note or tag** from the command palette, or click the checklist ribbon icon.
+2. Choose **Note** to search for a single note, or **Tag** to collect quizzes across matching notes.
+3. Review the number of quiz blocks found, then click **Start quiz**.
+4. Answer and check each quiz as usual, then choose **Next question** or **Finish**. You can also skip a question.
+
+The bank uses existing fenced `quiz` blocks; it does not generate questions from ordinary prose. Tags come from both note properties and inline tags. Selecting `#study` also includes `#study/history`, but not `#study-guide`. Each block is one quiz step, including blocks containing multiple matching questions.
+
+Questions follow note-path and block order. Invalid blocks are reported and skipped. Links and images resolve relative to the original note. Sessions do not save answers or scores; closing the dialog ends the session. Gated blocks open directly during a session.
+
 ## Supported quiz types
 
 ### `radio` — single correct option
@@ -174,6 +204,26 @@ feedback: >-
 </details>
 
 ## Installation
+
+### 開發部署至本機 Obsidian Vault
+
+參考 LifeOS 的部署方式，一次完成編譯與複製插件檔案。先安裝專案依賴，再執行：
+
+直接在終端機執行 `./auto-deploy.sh` 或 `npm run deploy`，即可進入中文互動精靈：選擇目前設定或 Obsidian 已登記的 Vault（也可手動輸入）→ 選擇重新編譯／現有產物 → 是否記住路徑 → 確認部署。支援空白與 `~/` 路徑；輸入 `q` 或按 Ctrl+C 可取消。只有部署成功後才儲存選擇。
+
+`npm run deploy:interactive` 可明確啟動互動模式。帶有 `--vault` 等參數，或在沒有互動終端機的環境執行時，沿用下方的非互動部署方式：
+
+```bash
+npm run deploy -- --vault "/path/to/your/vault"
+# 或使用與 LifeOS 相同的 shell 入口
+./auto-deploy.sh --vault "/path/to/your/vault"
+```
+
+若要固定部署位置，將 `.quiz-blocks-dev.example.json` 複製為 `.quiz-blocks-dev.json`，修改 `vaultPath`，之後只需執行 `./auto-deploy.sh` 或 `npm run deploy`。本機設定檔不會提交到 Git。
+
+也支援 `DEMO_VAULT="/path/to/vault" npm run deploy:demo`。路徑優先順序為 `--vault` → `DEMO_VAULT` → 本機設定檔；相對路徑以專案根目錄為準，支援 `~/`。目標 Vault 必須已存在。
+
+預設會重新編譯；加上 `--skip-build` 可部署已有產物。腳本只覆蓋 `.obsidian/plugins/quiz-blocks/` 中的 `main.js`、`styles.css`、`manifest.json`，保留 `data.json` 與筆記。完成後，在 Obsidian「設定 → 社群外掛」啟用 Quiz blocks，或關閉後重新開啟以載入新版。
 
 **Quiz Blocks** is currently waiting for approval to appear in the official Obsidian Community Plugins list.
 Until then, it can be installed and automatically updated using **BRAT** or manually.
