@@ -28,7 +28,6 @@ const c    = (color, text) => `${ansi[color]}${text}${ansi.reset}`;
 const bold = text => `${ansi.bold}${text}${ansi.reset}`;
 const dim  = text => `${ansi.dim}${text}${ansi.reset}`;
 const col0 = `${ESC}1G`;
-const moveUp = n => `${ESC}${n}A`;
 
 // ─── Spinner ──────────────────────────────────────────────────────────────────
 function spinner(text) {

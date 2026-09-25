@@ -6,7 +6,7 @@
 	interface Props {
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "prompt" }>;
-		onFinish: () => void;
+		onFinish: (correct: null) => void;
 		onReset: () => void;
 	}
 
@@ -16,7 +16,7 @@
 	function onCheck() {
 		if (checked) return;
 		checked = true;
-		onFinish();
+		onFinish(null);
 	}
 
 	function reset() {

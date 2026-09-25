@@ -8,7 +8,7 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "radio" }>;
 		stableId: string;
-		onFinish: () => void;
+		onFinish: (correct: boolean) => void;
 		onReset: () => void;
 	}
 
@@ -28,7 +28,7 @@
 	function onCheck() {
 		if (!selectedId) return;
 		frozen = true;
-		onFinish();
+		onFinish(quiz.options.some(opt => optionId(opt) === selectedId && opt.correct));
 	}
 
 	function reset() {

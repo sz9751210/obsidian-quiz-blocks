@@ -21,6 +21,21 @@ test("all six templates parse with all combinations of insertion defaults", () =
 	}
 });
 
+test("rejects quiz answers that the controls cannot grade correctly", () => {
+	const optionQuiz = (type, correctFlags) => `type: ${type}\noptions:\n${correctFlags.map((correct, i) => `  - content: Option ${i + 1}\n    correct: ${correct}`).join("\n")}`;
+	assert.throws(() => parseQuizBlock(optionQuiz("radio", [false, false]), 4), /exactly one correct option/);
+	assert.throws(() => parseQuizBlock(optionQuiz("radio", [true, true]), 4), /exactly one correct option/);
+	assert.throws(() => parseQuizBlock(optionQuiz("checkbox", [false, false]), 4), /at least one correct option/);
+	assert.doesNotThrow(() => parseQuizBlock(optionQuiz("checkbox", [true, true]), 4));
+
+	const pairs = (type, options, answers) => `type: ${type}\noptions:\n${options.map(id => `  - id: ${id}\n    content: ${id}`).join("\n")}\nquestions:\n${answers.map((id, i) => `  - content: Question ${i + 1}\n    correct_option: ${id}`).join("\n")}`;
+	assert.throws(() => parseQuizBlock(pairs("noodle", ["a", "b"], ["a", "a"]), 4), /answer to more than one question/);
+	assert.throws(() => parseQuizBlock(pairs("noodle", ["a"], ["a", "a"]), 4), /at least as many options as questions/);
+	const collidingId = pairs("noodle", ["a", "b"], ["a", "b"]).replace("  - content: Question 2", "  - id: q-0\n    content: Question 2");
+	assert.throws(() => parseQuizBlock(collidingId, 4), /Duplicate noodle question id/);
+	assert.doesNotThrow(() => parseQuizBlock(pairs("choice", ["a"], ["a", "a"]), 4));
+});
+
 test("quick syntax recognizes radio and ratio without changing ordinary text or code", () => {
 	assert.equal(matchingTemplates("").length, 6);
 	for (const query of ["ra", "rad", "radio", "rat", "ratio", "RATIO"]) {

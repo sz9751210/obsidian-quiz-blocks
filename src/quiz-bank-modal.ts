@@ -90,20 +90,41 @@ export class QuizBankModal extends Modal {
 			details.createEl("pre", { text: errors.join("\n\n") });
 		}
 		if (!questions.length) this.contentEl.createEl("p", { text: "Add a quiz code block to a matching note, then try again." });
+		let shuffleQuestions = false;
+		new Setting(this.contentEl).setName("Shuffle questions")
+			.addToggle(toggle => toggle.onChange(value => { shuffleQuestions = value; }));
 		new Setting(this.contentEl)
 			.addButton(button => button.setButtonText("Choose another bank").onClick(() => { this.contentEl.empty(); this.onOpen(); }))
 			.addButton(button => button.setButtonText("Start quiz").setCta().setDisabled(!questions.length)
-				.onClick(() => this.showQuestion(questions, 0)));
+				.onClick(() => {
+					if (shuffleQuestions) {
+						for (let i = questions.length - 1; i > 0; i--) {
+							const j = Math.floor(Math.random() * (i + 1));
+							[questions[i], questions[j]] = [questions[j]!, questions[i]!];
+						}
+					}
+					this.showQuestion(questions, 0, new Array<boolean | null | undefined>(questions.length));
+				}));
 	}
 
-	private showQuestion(questions: Question[], index: number) {
+	private showQuestion(questions: Question[], index: number, results: (boolean | null | undefined)[]) {
 		if (this.questionChild) this.lifecycle.removeChild(this.questionChild);
 		this.questionChild = undefined;
 		this.contentEl.empty();
 		const question = questions[index];
 		if (!question) {
-			this.contentEl.createEl("p", { text: "End of quiz." });
-			new Setting(this.contentEl).addButton(button => button.setButtonText("Close").onClick(() => this.close()));
+			const correct = results.filter(result => result === true).length;
+			const incorrect = results.filter(result => result === false).length;
+			const reviewed = results.filter(result => result === null).length;
+			const skipped = questions.length - correct - incorrect - reviewed;
+			this.contentEl.createEl("h3", { text: "Quiz complete" });
+			this.contentEl.createEl("p", { text: `${correct} correct · ${incorrect} incorrect · ${reviewed} reviewed · ${skipped} skipped` });
+			this.contentEl.createEl("p", { text: "Text and prompt questions are reviewed without automatic grading." });
+			const retry = questions.filter((_, i) => results[i] === false || results[i] === undefined);
+			new Setting(this.contentEl)
+				.addButton(button => button.setButtonText("Retry incorrect or skipped").setDisabled(!retry.length)
+						.onClick(() => this.showQuestion(retry, 0, new Array<boolean | null | undefined>(retry.length))))
+				.addButton(button => button.setButtonText("Close").onClick(() => this.close()));
 			return;
 		}
 		this.contentEl.createEl("p", { text: `Question ${index + 1} of ${questions.length} · ${question.path}` });
@@ -113,10 +134,11 @@ export class QuizBankModal extends Modal {
 			ctx: { app: this.app, component: this.lifecycle, sourcePath: question.path },
 			quiz: question.quiz,
 			stableId: `bank-${index}-${question.line}`,
+			onResult: result => { results[index] = result; },
 		}));
 		new Setting(this.contentEl).addButton(button => button
-			.setButtonText(index === questions.length - 1 ? "Finish" : "Next question")
-			.onClick(() => this.showQuestion(questions, index + 1)));
+			.setButtonText(index === questions.length - 1 ? "Finish / skip" : "Next / skip")
+			.onClick(() => this.showQuestion(questions, index + 1, results)));
 	}
 
 	onClose() {

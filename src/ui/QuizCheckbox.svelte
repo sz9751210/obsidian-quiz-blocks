@@ -9,7 +9,7 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "checkbox" }>;
 		stableId: string;
-		onFinish: () => void;
+		onFinish: (correct: boolean) => void;
 		onReset: () => void;
 	}
 
@@ -35,7 +35,7 @@
 	function onCheck() {
 		if (selectedIds.size === 0) return;
 		frozen = true;
-		onFinish();
+		onFinish(quiz.options.every(opt => selectedIds.has(optionId(opt)) === opt.correct));
 	}
 
 	function reset() {

@@ -9,7 +9,7 @@
 	interface Props {
 		ctx: AppContext;
 		quiz: Extract<Quiz, { type: "noodle" }>;
-		onFinish: () => void;
+		onFinish: (correct: boolean) => void;
 		onReset: () => void;
 	}
 
@@ -381,7 +381,7 @@
 		pending = null;
 		dragging = false;
 		hoverTarget = null;
-		onFinish();
+		onFinish(pairs.length === quiz.questions.length && pairs.every(isCorrectPair));
 	}
 
 	function reset() {
@@ -589,6 +589,11 @@
 								 class:is-wrong={status === "wrong"}
 							>
 								<InlineMarkdown {ctx} markdown={q.feedback}/>
+							</div>
+						{/if}
+						{#if frozen && status !== "correct"}
+							<div class="quiz-noodle-feedback is-correct">
+								Correct answer: <InlineMarkdown {ctx} markdown={quiz.options.find(opt => optionId(opt) === q.correct_option)?.content ?? q.correct_option}/>
 							</div>
 						{/if}
 					</li>

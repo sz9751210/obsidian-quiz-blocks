@@ -6,7 +6,7 @@
 	interface Props {
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "choice" }>;
-		onFinish: () => void;
+		onFinish: (correct: boolean) => void;
 		onReset: () => void;
 	}
 
@@ -26,7 +26,7 @@
 
 	function onCheck() {
 		frozen = true;
-		onFinish();
+		onFinish(quiz.questions.every((q, i) => answers[i] === q.correct_option));
 	}
 
 	function reset() {
@@ -84,6 +84,11 @@
 							{selectedId}
 						{/if}
 					</div>
+					{#if !correct}
+						<div class="quiz-choice-correct">
+							Correct answer: <InlineMarkdown {ctx} markdown={selectedOption(q.correct_option)?.content ?? q.correct_option}/>
+						</div>
+					{/if}
 
 					{#if q.feedback}
 						<div class="quiz-choice-feedback" class:is-correct={correct} class:is-wrong={!correct}>

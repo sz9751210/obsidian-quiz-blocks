@@ -19,6 +19,7 @@ type Props = {
 	ctx: AppContext,
 	quiz: Quiz;
 	stableId: string;
+	onResult?: (result: boolean | null | undefined) => void;
 };
 
 export class QuizSvelteChild extends MarkdownRenderChild {

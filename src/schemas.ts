@@ -156,6 +156,13 @@ function createOptionQuizSchema<T extends "radio" | "checkbox">(type: T) {
 		.strict()
 		.superRefine((quiz, ctx) => {
 			enforceUniqueIds("options", quiz.options, ctx, optionIdDuplicateMessage);
+			const correctCount = quiz.options.filter(option => option.correct).length;
+			if (type === "radio" && correctCount !== 1) {
+				ctx.addIssue({ code: "custom", message: "Radio quizzes need exactly one correct option.", path: ["options"] });
+			}
+			if (type === "checkbox" && correctCount === 0) {
+				ctx.addIssue({ code: "custom", message: "Checkbox quizzes need at least one correct option.", path: ["options"] });
+			}
 		});
 }
 
@@ -179,6 +186,24 @@ function createPairQuizSchema<T extends "choice" | "noodle">(type: T) {
 					});
 				}
 			});
+			if (type === "noodle") {
+				if (quiz.options.length < quiz.questions.length) {
+					ctx.addIssue({ code: "custom", message: "Noodle quizzes need at least as many options as questions.", path: ["options"] });
+				}
+				const used = new Set<string>();
+				const renderedIds = new Set<string>();
+				quiz.questions.forEach((q, i) => {
+					const renderedId = q.id ?? `q-${i}`;
+					if (renderedIds.has(renderedId)) {
+						ctx.addIssue({ code: "custom", message: `Duplicate noodle question id: ${renderedId}.`, path: ["questions", i, "id"] });
+					}
+					renderedIds.add(renderedId);
+					if (used.has(q.correct_option)) {
+						ctx.addIssue({ code: "custom", message: `Noodle option ${q.correct_option} is the answer to more than one question.`, path: ["questions", i, "correct_option"] });
+					}
+					used.add(q.correct_option);
+				});
+			}
 		});
 }
 

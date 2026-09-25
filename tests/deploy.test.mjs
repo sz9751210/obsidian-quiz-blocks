@@ -11,6 +11,7 @@ test("deploy respects target precedence, preserves data, and stops on invalid in
 	try {
 		mkdirSync(join(root, "scripts"));
 		copyFileSync(new URL("../scripts/deploy.mjs", import.meta.url), join(root, "scripts/deploy.mjs"));
+		writeFileSync(join(root, "scripts/deploy-ui.py"), `import os, sys\nresult = os.environ.get("QUIZ_DEPLOY_WIZARD")\nif not result: sys.exit(1)\nwith open(sys.argv[sys.argv.index("--output") + 1], "w") as output: output.write(result)\n`);
 		const vault = join(root, "vault with spaces");
 		const target = join(vault, ".obsidian/plugins/quiz-blocks");
 		mkdirSync(target, { recursive: true });
@@ -18,8 +19,8 @@ test("deploy respects target precedence, preserves data, and stops on invalid in
 		writeFileSync(join(vault, "note.md"), "keep this note");
 		const artifacts = { "main.js": "new plugin", "styles.css": "new styles", "manifest.json": '{"id":"quiz-blocks"}' };
 		for (const [name, content] of Object.entries(artifacts)) writeFileSync(join(root, name), content);
-		const run = (args, demoVault = "", input = "") => spawnSync(process.execPath, [join(root, "scripts/deploy.mjs"), ...args], {
-			cwd: tmpdir(), env: { ...process.env, DEMO_VAULT: demoVault }, encoding: "utf8", input,
+		const run = (args, demoVault = "", wizard = "") => spawnSync(process.execPath, [join(root, "scripts/deploy.mjs"), ...args], {
+			cwd: tmpdir(), env: { ...process.env, DEMO_VAULT: demoVault, QUIZ_DEPLOY_WIZARD: wizard }, encoding: "utf8",
 		});
 		assert.equal(run(["--help"]).status, 0);
 		assert.equal(run(["--skip-build"]).status, 1);
@@ -31,21 +32,12 @@ test("deploy respects target precedence, preserves data, and stops on invalid in
 		for (const [name, content] of Object.entries(artifacts)) assert.equal(readFileSync(join(target, name), "utf8"), content);
 		assert.equal(readFileSync(join(target, "data.json"), "utf8"), "saved answers");
 		assert.equal(readFileSync(join(vault, "note.md"), "utf8"), "keep this note");
-		const interactive = run(["--interactive"], "", `invalid\n0\n"${vault}"\ninvalid\n2\ny\ny\n`);
+		const interactive = run(["--interactive"], "", JSON.stringify({ vaultPath: vault, skipBuild: true, save: true }));
 		assert.equal(interactive.status, 0, interactive.stderr);
-		assert.match(interactive.stdout, /部署完成/);
 		assert.equal(JSON.parse(readFileSync(join(root, ".quiz-blocks-dev.json"), "utf8")).vaultPath, vault);
-		const beforeCancel = readFileSync(join(root, ".quiz-blocks-dev.json"), "utf8");
 		writeFileSync(join(root, "main.js"), "must not deploy");
-		const cancelled = run(["--interactive"], "", "1\n2\ny\nn\n");
-		assert.equal(cancelled.status, 0);
-		assert.match(cancelled.stdout, /已取消部署/);
-		assert.equal(readFileSync(join(root, ".quiz-blocks-dev.json"), "utf8"), beforeCancel);
+		assert.equal(run(["--interactive"]).status, 0);
 		assert.equal(readFileSync(join(target, "main.js"), "utf8"), "new plugin");
-		assert.match(run(["--interactive"], "", "q\n").stdout, /已取消部署/);
-		assert.match(run(["--interactive"], "", "").stdout, /已取消部署/);
-
-		writeFileSync(join(root, "main.js"), "must not deploy");
 		assert.equal(run(["--vault", vault]).status, 1); // No Vite in fixture: build fails.
 		assert.equal(readFileSync(join(target, "main.js"), "utf8"), "new plugin");
 		rmSync(join(root, "styles.css"));

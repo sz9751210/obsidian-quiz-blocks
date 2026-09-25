@@ -16,21 +16,24 @@
 		ctx: AppContext;
 		stableId: string;
 		quiz: Quiz;
+		onResult?: (result: boolean | null | undefined) => void;
 	}
 
-	let { ctx, stableId, quiz }: Props = $props();
+	let { ctx, stableId, quiz, onResult }: Props = $props();
 
 	let gate: { disable: () => void; };
 
 	let quizInProgress = $derived(quiz.gated === false);
 
-	function onFinish() {
+	function onFinish(result: boolean | null) {
 		quizInProgress = false;
 		gate?.disable();
+		onResult?.(result);
 	}
 
 	function onReset() {
 		quizInProgress = true;
+		onResult?.(undefined);
 	}
 </script>
 

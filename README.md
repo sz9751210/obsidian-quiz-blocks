@@ -32,12 +32,12 @@ Open **Settings → Quiz Blocks** to toggle quick insertion, choose a display st
 
 1. Run **Quiz Blocks: Start quiz from note or tag** from the command palette, or click the checklist ribbon icon.
 2. Choose **Note** to search for a single note, or **Tag** to collect quizzes across matching notes.
-3. Review the number of quiz blocks found, then click **Start quiz**.
-4. Answer and check each quiz as usual, then choose **Next question** or **Finish**. You can also skip a question.
+3. Review the number of quiz blocks found, optionally enable **Shuffle questions**, then click **Start quiz**.
+4. Answer and check each quiz, then advance or skip it. At the end, review the summary and retry incorrect or skipped questions.
 
 The quiz bank uses existing fenced `quiz` blocks — it does not generate questions from ordinary prose. Tags come from both note properties and inline tags. Selecting `#study` also includes `#study/history`, but not `#study-guide`. Each block is one quiz step, including blocks containing multiple matching questions.
 
-Questions follow note-path and block order. Invalid blocks are reported and skipped. Links and images resolve relative to the original note. Sessions do not save answers or scores; closing the dialog ends the session. Gated blocks open directly during a session.
+Without shuffling, questions follow note-path and block order. Invalid blocks are reported and skipped. Links and images resolve relative to the original note. Radio, checkbox, choice, and noodle blocks count as correct only when the whole block is answered correctly; text and prompt blocks count as reviewed without automatic grading. Results are not saved; closing the dialog ends the session. Gated blocks open directly during a session.
 
 
 ## Supported quiz types

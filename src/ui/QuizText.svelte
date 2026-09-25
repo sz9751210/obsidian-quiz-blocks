@@ -9,7 +9,7 @@
 		ctx: AppContext,
 		quiz: Extract<Quiz, { type: "text" }>;
 		stableId: string;
-		onFinish: () => void;
+		onFinish: (correct: null) => void;
 		onReset: () => void;
 	}
 
@@ -23,7 +23,7 @@
 		// and reveals the reference answer (if provided).
 		if (answer.trim().length === 0) return;
 		frozen = true;
-		onFinish();
+		onFinish(null);
 	}
 
 	async function reset() {

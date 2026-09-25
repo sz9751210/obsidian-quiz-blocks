@@ -65,4 +65,11 @@
 			margin: 0;
 		}
 	}
+
+	.quiz-choice-correct {
+		margin-top: 4px;
+		color: var(--quiz-right);
+		font-size: var(--font-smaller);
+		:global(p) { margin: 0; }
+	}
 }
