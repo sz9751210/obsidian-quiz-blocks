@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { quizSources, matchesTag } from "../src/question-bank.ts";
+import { createJiti } from "jiti";
+
+const jiti = createJiti(import.meta.url);
+const { quizSources, matchesTag } = await jiti.import("../src/question-bank.ts");
 
 const section = (start, end, type = "code") => ({
 	type,

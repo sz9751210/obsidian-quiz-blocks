@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createJiti } from "jiti";
-import { DEFAULT_SETTINGS, QUIZ_TEMPLATES, matchingTemplates, readSettings, shortcutQuery, templateSnippet, templateSource } from "../src/snippets.ts";
 
 const jiti = createJiti(import.meta.url);
+const { DEFAULT_SETTINGS, QUIZ_TEMPLATES, matchingTemplates, quizFenceTrigger, readSettings, shortcutQuery, templateSnippet, templateSource } = await jiti.import("../src/snippets.ts");
 const { parseQuizBlock } = await jiti.import("../src/parse.ts");
 
 test("all six templates parse with all combinations of insertion defaults", () => {
@@ -54,6 +54,16 @@ test("quick syntax recognizes radio and ratio without changing ordinary text or 
 	assert.equal(shortcutQuery("quiz:radio", 10, ["````markdown", "```"]), null);
 	assert.equal(shortcutQuery("quiz:radio", 10, ["---", "title: Test"]), null);
 	assert.equal(shortcutQuery("quiz:radio", 10, ["---", "title: Test", "---"]), "radio");
+});
+
+test("quiz fences offer templates only at a top-level opening fence", () => {
+	assert.deepEqual(quizFenceTrigger("```quiz", 7, []), { indent: "", fence: "```", query: "" });
+	assert.deepEqual(quizFenceTrigger("   ~~~quiz:ra", 13, []), { indent: "   ", fence: "~~~", query: "ra" });
+	assert.equal(quizFenceTrigger("```quiz extra", 7, []), null);
+	assert.equal(quizFenceTrigger("``quiz", 6, []), null);
+	assert.equal(quizFenceTrigger("```quiz", 7, ["```markdown"]), null);
+	assert.equal(quizFenceTrigger("```quiz", 7, ["---", "title: Test"]), null);
+	assert.deepEqual(quizFenceTrigger("```quiz", 7, ["---", "title: Test", "---"]), { indent: "", fence: "```", query: "" });
 });
 
 test("saved preferences retain supported values and reject malformed settings", () => {

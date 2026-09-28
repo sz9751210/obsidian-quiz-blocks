@@ -81,10 +81,28 @@ export function matchingTemplates(query: string): QuizTemplate[] {
 		|| (template.type === "radio" && "ratio".startsWith(normalized)));
 }
 
+export type QuizFenceTrigger = {
+	fence: string;
+	indent: string;
+	query: string;
+};
+
 // A shortcut occupies its own top-level line; leave YAML and code examples alone.
 export function shortcutQuery(line: string, ch: number, precedingLines: Iterable<string>): string | null {
 	const match = /^quiz:([a-z]*)$/i.exec(line.slice(0, ch));
 	if (!match || line.slice(ch).trim()) return null;
+	return isInsideProtectedSection(precedingLines) ? null : match[1]!;
+}
+
+// Offer templates immediately after a new ```quiz or ~~~quiz fence.
+// An optional suffix (for example ```quiz:ra) filters the same menu.
+export function quizFenceTrigger(line: string, ch: number, precedingLines: Iterable<string>): QuizFenceTrigger | null {
+	const match = /^( {0,3})(`{3,}|~{3,})quiz(?::([a-z]*))?$/i.exec(line.slice(0, ch));
+	if (!match || line.slice(ch).trim() || isInsideProtectedSection(precedingLines)) return null;
+	return { indent: match[1]!, fence: match[2]!, query: match[3] ?? "" };
+}
+
+function isInsideProtectedSection(precedingLines: Iterable<string>): boolean {
 	let fence = "";
 	let frontmatter = false;
 	let first = true;
@@ -102,5 +120,5 @@ export function shortcutQuery(line: string, ch: number, precedingLines: Iterable
 			fence = /^ {0,3}(`{3,}|~{3,})/.exec(previous)?.[1] ?? "";
 		}
 	}
-	return fence || frontmatter ? null : match[1]!;
+	return Boolean(fence || frontmatter);
 }

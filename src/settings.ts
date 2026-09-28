@@ -54,8 +54,8 @@ export class QuizSettingTab extends PluginSettingTab {
 
 	private renderGeneral(containerEl: HTMLElement) {
 		const { quizPlugin } = this;
-		containerEl.createEl("p", { text: "在筆記空白行輸入 quiz:，選擇題型後按確認鍵，即可展開可直接作答的範本。也可使用指令面板的範本插入指令。" });
-		new Setting(containerEl).setName("快速語法").setDesc("輸入 quiz:radio 插入單選題；quiz:ratio 也可使用。僅在一般文字的獨立行啟用，不會改寫程式碼區塊。")
+		containerEl.createEl("p", { text: "輸入 ```quiz 後即可選擇題型並展開範本；也可在筆記空白行輸入 quiz:，或使用指令面板的範本插入指令。" });
+		new Setting(containerEl).setName("快速插入與題型選單").setDesc("輸入 ```quiz 或 ~~~quiz 可在新程式碼區塊開頭選擇題型；quiz:radio 也可插入單選題，quiz:ratio 同樣支援。既有程式碼區塊與 YAML frontmatter 不會觸發。")
 			.addToggle(toggle => toggle.setValue(quizPlugin.settings.quickSyntax).onChange(async value => {
 				quizPlugin.settings.quickSyntax = value;
 				await quizPlugin.saveSettings();

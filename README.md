@@ -12,7 +12,7 @@ Describe a quiz using a YAML code block tagged with `quiz`. The plugin transform
 
 ## Quick quiz insertion
 
-In the editor, type `quiz:` on a **standalone blank line**, use the arrow keys to pick a quiz type, and press **Enter** — the full YAML block is inserted with the question text pre-selected so you can start typing immediately. You can also run **Insert quiz template** from the command palette.
+In the editor, type `` ```quiz `` and the quiz-type menu appears immediately. Use the arrow keys to choose a type and press **Enter** — that line expands into a full YAML block with the question text pre-selected, ready for typing. `~~~quiz` works too. You can also type `quiz:` on a **standalone blank line**, or run **Insert quiz template** from the command palette.
 
 | Shorthand | Quiz type |
 |---|---|
